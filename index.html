@@ -1506,10 +1506,9 @@ function generate() {
   }
 
   const gameHtml = buildGameHtml(cfg);
-  const escaped = escapeForSrcdoc(gameHtml);
-
-  const iframeCode = `<iframe srcdoc="${escaped}" width="100%" height="600" frameborder="0" style="background:transparent;display:block" allow="autoplay"></iframe>`;
-
+  const b64 = btoa(unescape(encodeURIComponent(gameHtml)));
+const iframeCode = `<iframe src="data:text/html;charset=utf-8;base64,${b64}" width="100%" height="600" frameborder="0" style="background:transparent;display:block" allow="autoplay"></iframe>`;
+  
   document.getElementById('output').textContent = iframeCode;
   document.getElementById('preview').srcdoc = gameHtml;
 }
@@ -1617,6 +1616,10 @@ applyLang('ru');
 loadDemoQuestions();
 renderWheelOptions();
 generate();
+  // После всех объявлений функций, перед </script>
+window.startGame = startGame;
+window.resetGame = resetGame;
+window.masterVol = masterVol;
 </script>
 </body>
 </html>
