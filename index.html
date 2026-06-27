@@ -70,6 +70,7 @@
     .footer-brand-text{font-family:'Oswald',sans-serif;text-transform:uppercase;font-size:10px;letter-spacing:1.5px;color:#fff;margin:0;}
     .footer-brand-text span{color:var(--gold);}
     .footer-copyright{font-size:7px;color:#444;margin:0;text-transform:uppercase;}
+    .url-preview{max-width:100%;max-height:50px;border-radius:6px;margin-top:4px;border:1px solid #333;display:none;}
 
     /* RIGHT PREVIEW */
     .preview-side{flex:1;background:#050505;display:flex;flex-direction:column;padding:12px;}
@@ -125,21 +126,22 @@
       <!-- TAB: КАРТИНКИ -->
       <div id="tab-images" class="tab-pane">
         <h3>Фоны</h3>
-        <div class="field-group"><label>🌄 Фон игры (URL)</label><input id="url_bg" type="text" placeholder="https://..."></div>
-        <div class="field-group"><label>🎬 Фон стартового экрана (URL)</label><input id="url_start_bg" type="text" placeholder="https://..."></div>
-        <div class="field-group"><label>🏆 Фон экрана победы (URL)</label><input id="url_victory_bg" type="text" placeholder="https://..."></div>
+        <div class="field-group"><label>🌄 Фон игры (URL)</label><input id="url_bg" type="text" placeholder="https://..." oninput="previewUrl(this,'prev_url_bg')"><img id="prev_url_bg" class="url-preview"></div>
+        <div class="field-group"><label>🎬 Фон стартового экрана (URL)</label><input id="url_start_bg" type="text" placeholder="https://..." oninput="previewUrl(this,'prev_url_start_bg')"><img id="prev_url_start_bg" class="url-preview"></div>
+        <div class="field-group"><label>🏆 Фон экрана победы (URL)</label><input id="url_victory_bg" type="text" placeholder="https://..." oninput="previewUrl(this,'prev_url_victory_bg')"><img id="prev_url_victory_bg" class="url-preview"></div>
         <h3>Колесо</h3>
-        <div class="field-group"><label>🎡 Фон колеса (круглый, URL)</label><input id="url_wheel_bg" type="text" placeholder="https://..."></div>
-        <div class="field-group"><label>🔘 Рамка / обод колеса (URL)</label><input id="url_wheel_frame" type="text" placeholder="https://..."></div>
-        <div class="field-group"><label>▶ Указатель/стрелка (URL)</label><input id="url_pointer" type="text" placeholder="https://..."></div>
+        <div class="field-group"><label>🎡 Фон колеса (круглый, URL)</label><input id="url_wheel_bg" type="text" placeholder="https://..." oninput="previewUrl(this,'prev_url_wheel_bg')"><img id="prev_url_wheel_bg" class="url-preview"></div>
+        <div class="field-group"><label>🔘 Рамка / обод колеса (URL)</label><input id="url_wheel_frame" type="text" placeholder="https://..." oninput="previewUrl(this,'prev_url_wheel_frame')"><img id="prev_url_wheel_frame" class="url-preview"></div>
+        <div class="field-group"><label>▶ Указатель/стрелка (URL)</label><input id="url_pointer" type="text" placeholder="https://..." oninput="previewUrl(this,'prev_url_pointer')"><img id="prev_url_pointer" class="url-preview"></div>
         <h3>Карточки и кнопки</h3>
-        <div class="field-group"><label>🃏 Фон карточки задания (URL)</label><input id="url_card_bg" type="text" placeholder="https://..."></div>
-        <div class="field-group"><label>➔ Стрелка между карточкой и колесом (URL)</label><input id="url_arrow" type="text" placeholder="https://...">
+        <div class="field-group"><label>🃏 Фон карточки задания (URL)</label><input id="url_card_bg" type="text" placeholder="https://..." oninput="previewUrl(this,'prev_url_card_bg')"><img id="prev_url_card_bg" class="url-preview"></div>
+        <div class="field-group"><label>➔ Стрелка между карточкой и колесом (URL)</label><input id="url_arrow" type="text" placeholder="https://..." oninput="previewUrl(this,'prev_url_arrow')">
+          <img id="prev_url_arrow" class="url-preview">
           <label class="check-row" style="margin-top:5px;"><input type="checkbox" id="chk_arrow_pulse" checked><span>Пульсация стрелки</span></label>
         </div>
-        <div class="field-group"><label>📊 Иконка прогресса (URL)</label><input id="url_progress" type="text" placeholder="https://..."></div>
-        <div class="field-group"><label>🎆 Частицы победы (URL)</label><input id="url_particle" type="text" placeholder="https://..."></div>
-        <div class="field-group"><label>🖱 Фон кнопки ответа (URL)</label><input id="url_btn_bg" type="text" placeholder="https://..."></div>
+        <div class="field-group"><label>📊 Иконка прогресса (URL)</label><input id="url_progress" type="text" placeholder="https://..." oninput="previewUrl(this,'prev_url_progress')"><img id="prev_url_progress" class="url-preview"></div>
+        <div class="field-group"><label>🎆 Частицы победы (URL)</label><input id="url_particle" type="text" placeholder="https://..." oninput="previewUrl(this,'prev_url_particle')"><img id="prev_url_particle" class="url-preview"></div>
+        <div class="field-group"><label>🖱 Фон кнопки ответа (URL)</label><input id="url_btn_bg" type="text" placeholder="https://..." oninput="previewUrl(this,'prev_url_btn_bg')"><img id="prev_url_btn_bg" class="url-preview"></div>
       </div>
 
       <!-- TAB: СТИЛЬ -->
@@ -216,6 +218,7 @@
           <div><label>Цвет тени</label><input type="color" id="clr_shadow" value="#000000"></div>
           <div><label>Рамка карточки</label><input type="color" id="clr_card_border" value="#ffd700"></div>
           <div><label>Толщина рамки</label><input type="number" id="sld_card_border_width" value="3" min="0" max="8"></div>
+          <div><label>Прозрачность рамки</label><input type="number" id="sld_card_border_opacity" value="1" min="0" max="1" step="0.05"></div>
         </div>
         <div class="field-group row3">
           <div><label>Подложка актив. слова</label><input type="color" id="clr_active_bg" value="#000000"></div>
@@ -309,7 +312,7 @@
       <button class="btn-action btn-copy" id="btnDownload">↓ HTML</button>
     </div>
     <div class="studio-footer">
-      <img src="https://raw.githubusercontent.com/VeRa422/hidden_artifacts/main/logo.png" alt="Logo" class="footer-logo-img">
+      <img src="https://raw.githubusercontent.com/VeRa422/hidden_artifacts/main/logo.png" alt="Logo" class="footer-logo-img" onerror="this.style.display='none'">
       <p class="footer-brand-text"><span>ИГРОВОЙ</span> КВАРТАЛ</p>
       <p class="footer-copyright">© Все права защищены</p>
     </div>
@@ -1077,7 +1080,82 @@ document.querySelectorAll('#tab-texts input, #tab-images input, #tab-style input
   el.addEventListener('change', generate);
 });
 
-loadDemoQuestions();
+// =========== SAVE/RESTORE FIELDS ===========
+var SAVE_FIELDS = [
+  'ui_title','ui_subtitle','ui_start','ui_blank','ui_victory_title','ui_victory_sub',
+  'ui_again','ui_unlock','iframe_w','iframe_h',
+  'url_bg','url_start_bg','url_victory_bg','url_wheel_bg','url_wheel_frame',
+  'url_pointer','url_card_bg','url_arrow','url_progress','url_particle','url_btn_bg',
+  'clr_title','clr_btn_text','clr_btn_bg1','clr_btn_bg2','clr_btn_border',
+  'clr_wheel_text','clr_wheel_active','clr_card_text','clr_shadow','clr_card_border','clr_active_bg',
+  'sel_font_title','sel_font_body',
+  'sld_btn_radius','sld_title_glow','sld_btn_glow','sld_btn_opacity',
+  'sld_shadow_size','sld_shadow_blur','sld_card_border_width','sld_card_border_opacity',
+  'sld_active_bg_opacity','sld_active_bg_radius'
+];
+var SAVE_CHECKS = ['transparentBg','chk_arrow_pulse'];
+
+function saveFields() {
+  try {
+    var data = {};
+    SAVE_FIELDS.forEach(function(id) {
+      var el = document.getElementById(id);
+      if(el) data[id] = el.value;
+    });
+    SAVE_CHECKS.forEach(function(id) {
+      var el = document.getElementById(id);
+      if(el) data[id] = el.checked;
+    });
+    localStorage.setItem('wof_editor_v2', JSON.stringify(data));
+  } catch(e) {}
+}
+
+function restoreFields() {
+  try {
+    var raw = localStorage.getItem('wof_editor_v2');
+    if(!raw) return false;
+    var data = JSON.parse(raw);
+    SAVE_FIELDS.forEach(function(id) {
+      var el = document.getElementById(id);
+      if(el && data[id] !== undefined) {
+        el.value = data[id];
+        // trigger preview for URL fields
+        if(id.startsWith('url_') && data[id]) {
+          var prevId = 'prev_' + id;
+          var img = document.getElementById(prevId);
+          if(img) { img.src=data[id]; img.style.display='block'; img.onerror=function(){img.style.display='none';}; }
+        }
+      }
+    });
+    SAVE_CHECKS.forEach(function(id) {
+      var el = document.getElementById(id);
+      if(el && data[id] !== undefined) el.checked = data[id];
+    });
+    // Restore wheel options and questions from separate keys
+    var q = localStorage.getItem('wof_questions_v2');
+    if(q) { try { questions = JSON.parse(q); renderQuestions(); } catch(e){} }
+    var wo = localStorage.getItem('wof_wheel_extra_v2');
+    if(wo) { try { wheelExtraOptions = JSON.parse(wo); } catch(e){} }
+    var wm = localStorage.getItem('wof_wheel_manual_v2');
+    if(wm) { try { wheelManualOptions = JSON.parse(wm); } catch(e){} }
+    return true;
+  } catch(e) { return false; }
+}
+
+// Auto-save on any change
+document.querySelectorAll('input,select,textarea').forEach(function(el) {
+  el.addEventListener('change', function() {
+    saveFields();
+    localStorage.setItem('wof_questions_v2', JSON.stringify(questions));
+    localStorage.setItem('wof_wheel_extra_v2', JSON.stringify(wheelExtraOptions));
+    localStorage.setItem('wof_wheel_manual_v2', JSON.stringify(wheelManualOptions));
+  });
+  el.addEventListener('input', saveFields);
+});
+
+// Restore on load
+var restored = restoreFields();
+if(!restored) loadDemoQuestions();
 renderWheelOptions();
 generate();
 
