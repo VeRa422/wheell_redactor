@@ -693,8 +693,22 @@ ___ you see the light? | can" style="margin-top:8px; min-height:150px"></textare
   </div>
 
   <!-- GENERATE -->
-  <div style="margin:20px 0">
-    <button class="btn" onclick="generate()">⚡ СОЗДАТЬ ИГРУ</button>
+  <div style="margin:20px 0 10px">
+    <div style="background:var(--gold-light);border:1px solid rgba(212,175,55,0.2);border-radius:14px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:900;color:var(--dark);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;">📐 Размер iframe на слайде Genially</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;">
+        <div>
+          <label style="font-size:10px;color:#7a6530;">Ширина</label>
+          <input type="text" id="iframe_w" value="100%" style="padding:8px;font-size:12px;">
+        </div>
+        <div>
+          <label style="font-size:10px;color:#7a6530;">Высота (px)</label>
+          <input type="number" id="iframe_h" value="600" style="padding:8px;font-size:12px;">
+        </div>
+      </div>
+      <div style="font-size:10px;color:#999;line-height:1.5;">Примеры ширины: 100%, 800px, 70%. После вставки в Genially растяните iframe — игра масштабируется автоматически.</div>
+    </div>
+    <button class="btn" id="btnGenerate">⚡ СОЗДАТЬ ИГРУ</button>
   </div>
 
   <!-- OUTPUT -->
@@ -1031,6 +1045,16 @@ function buildGameHtml(cfg){
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:${st.fontBody};cursor:crosshair;}
 ${transparentCSS}
+.game-layout{gap:clamp(20px,4vw,80px)!important;margin-top:clamp(15px,3vh,50px)!important;}
+.wheel-box{width:clamp(220px,38vw,480px)!important;height:clamp(220px,38vw,480px)!important;}
+.card-stack{width:clamp(200px,30vw,450px)!important;height:clamp(100px,13vw,180px)!important;}
+.quest-card{font-size:clamp(13px,1.8vw,26px)!important;}
+.gold-text{font-size:clamp(22px,4vw,60px)!important;}
+.game-btn{font-size:clamp(12px,1.5vw,24px)!important;padding:clamp(10px,1.5vh,16px) clamp(20px,4vw,70px)!important;}
+.word-text{font-size:clamp(11px,1.4vw,20px)!important;}
+.active-word .word-text{font-size:clamp(16px,2.2vw,32px)!important;}
+.prog-slot{width:clamp(20px,3vw,35px)!important;height:clamp(20px,3vw,35px)!important;}
+.static-pointer{width:clamp(50px,7vw,90px)!important;height:clamp(50px,7vw,90px)!important;right:clamp(-35px,-5vw,-55px)!important;margin-top:clamp(-25px,-3vw,-45px)!important;}
 #custom-cursor{position:fixed;width:20px;height:20px;border:2px solid #ffd700;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);box-shadow:0 0 15px #ffd700;}
 .overlay{position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:5000;}
 #start-screen{${startBgCSS}}
@@ -1356,7 +1380,9 @@ function generate(){
 
   const gameHtml = buildGameHtml(cfg);
   const escaped = escapeForSrcdoc(gameHtml);
-  const iframeCode = '<iframe srcdoc="'+escaped+'" width="100%" height="600" frameborder="0" style="background:transparent;display:block" allow="autoplay"></iframe>';
+  const iW = document.getElementById('iframe_w') ? document.getElementById('iframe_w').value || '100%' : '100%';
+  const iH = document.getElementById('iframe_h') ? document.getElementById('iframe_h').value || '600' : '600';
+  const iframeCode = '<iframe srcdoc="'+escaped+'" width="'+iW+'" height="'+iH+'" frameborder="0" style="background:transparent;display:block" allow="autoplay"></iframe>';
 
   document.getElementById('output').textContent = iframeCode;
   document.getElementById('preview').srcdoc = gameHtml;
@@ -1364,7 +1390,17 @@ function generate(){
 
 function copyOut(){
   const txt=document.getElementById('output').textContent||'';
-  navigator.clipboard.writeText(txt).then(()=>alert('Скопировано!')).catch(()=>alert('Не удалось скопировать.'));
+  navigator.clipboard.writeText(txt).then(function(){
+    var btn = document.getElementById('btnCopy');
+    var orig = btn.textContent;
+    btn.textContent = '✓ СКОПИРОВАНО';
+    btn.style.background = '#2d6a2d';
+    setTimeout(function(){ btn.textContent = orig; btn.style.background = ''; }, 2000);
+  }).catch(function(){
+    var btn = document.getElementById('btnCopy');
+    btn.textContent = '✗ ОШИБКА';
+    setTimeout(function(){ btn.textContent = 'Скопировать'; }, 2000);
+  });
 }
 
 function downloadHtml(){
@@ -1399,6 +1435,13 @@ document.getElementById('new_wheel_option_manual').addEventListener('keydown',(e
 applyLang('ru');
 loadDemoQuestions();
 renderWheelOptions();
+
+// iframe size fields trigger regenerate
+['iframe_w','iframe_h'].forEach(function(id){
+  var el = document.getElementById(id);
+  if(el) el.addEventListener('input', generate);
+});
+
 generate();
 </script>
 </body>
