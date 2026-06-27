@@ -3,735 +3,329 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Wheel of Wisdom — Редактор игр</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Philosopher:wght@400;700&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+  <title>Wheel of Wisdom — Редактор</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Philosopher:wght@400;700&family=Montserrat:wght@400;700;900&family=Oswald:wght@500&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --primary:#D4AF37;
-      --accent:#C0392B;
-      --glass:rgba(255,252,245,0.96);
-      --dark:#2C1A05;
-      --sand:#F5E6C8;
-      --gold-light:#FFF8E7;
-      --gold-dark:#8B6914;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:'Montserrat',sans-serif;
-      background: radial-gradient(ellipse at top, #3d2b04 0%, #1a1003 60%, #000 100%);
-      color:#333;
-      padding:28px 14px;
-      min-height:100vh;
-    }
-    .bg-deco{
-      position:fixed; font-size:42px; opacity:.18; z-index:-1;
-      animation: floatUp 24s infinite linear;
-    }
-    @keyframes floatUp{
-      0%{transform:translateY(110vh) rotate(0deg)}
-      100%{transform:translateY(-10vh) rotate(360deg)}
-    }
-    .wrap{
-      max-width:1100px; margin:0 auto;
-      background:var(--glass);
-      border-radius:18px;
-      border:2px solid rgba(212,175,55,0.3);
-      box-shadow:0 0 20px rgba(212,175,55,0.3), 0 0 60px rgba(212,175,55,0.1);
-      padding:24px;
-    }
-    h1{
-      margin:0 0 6px;
-      font-family:'Cinzel Decorative',cursive;
-      font-size:36px;
-      text-align:center;
-      color:var(--dark);
-      text-shadow:1px 1px 0 var(--primary);
-    }
-    .sub{
-      text-align:center;
-      color:#666;
-      margin-bottom:18px;
-      font-size:13px;
-    }
-    .topbar{
-      display:flex; gap:12px; flex-wrap:wrap;
-      justify-content:space-between; align-items:center;
-      margin-bottom:14px;
-    }
-    .pill{
-      display:flex; gap:10px; flex-wrap:wrap;
-      align-items:center;
-      background:var(--gold-light);
-      border:1px solid rgba(212,175,55,0.25);
-      border-radius:999px;
-      padding:8px 14px;
-    }
-    label{font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:#7a6530}
-    .grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
-    .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px}
-    .grid4{display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px}
-    .card{
-      background:var(--gold-light);
-      border:1px solid rgba(212,175,55,0.2);
-      border-radius:14px;
-      padding:16px;
-      margin:14px 0;
-    }
-    .card h2{
-      margin:0 0 12px;
-      font-size:15px;
-      font-family:'Montserrat',sans-serif;
-      font-weight:900;
-      display:flex; align-items:center; gap:10px;
-      border-bottom:2px solid var(--primary);
-      padding-bottom:8px;
-      color:var(--dark);
-    }
-    input[type=text], textarea, select{
-      width:100%;
-      padding:10px;
-      border-radius:10px;
-      border:2px solid #e0d5b8;
-      font-family:'Montserrat',sans-serif;
-      outline:none;
-      transition:.2s;
-      background:#fff;
-      font-size:13px;
-    }
-    textarea{min-height:120px; resize:vertical; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; font-size:12px;}
-    input:focus, textarea:focus, select:focus{
-      border-color:var(--primary);
-      box-shadow:0 0 10px rgba(212,175,55,0.25);
-    }
-    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-    .help{font-size:11px; color:#888; margin-top:5px}
-    .mb8{margin-bottom:8px}
+    :root{--gold:#D4AF37;--gold-dark:#8B6914;--red:#C0392B;--panel:#1a1a1a;--bg-dark:#0a0a0a;--text:#e0e0e0;}
+    *{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+    body,html{margin:0;height:100%;font-family:'Montserrat',sans-serif;background:#000;color:var(--text);overflow:hidden;}
+    .app-container{display:flex;height:100vh;width:100vw;}
 
-    .btn{
-      width:100%; border:none; border-radius:999px;
-      padding:14px 18px; cursor:pointer;
-      background:linear-gradient(135deg, #D4AF37, #8B6914);
-      color:white;
-      font-family:'Cinzel Decorative',cursive;
-      font-size:17px; text-transform:uppercase;
-      box-shadow:0 5px 15px rgba(212,175,55,0.35);
-      transition:.12s;
-    }
-    .btn:hover{transform:scale(1.01)}
-    .btn:active{transform:scale(.98)}
+    /* LEFT PANEL */
+    .editor-side{width:480px;min-width:480px;background:var(--panel);border-right:2px solid var(--gold-dark);display:flex;flex-direction:column;z-index:10;}
+    .editor-header{padding:12px;background:var(--bg-dark);border-bottom:1px solid #333;text-align:center;}
+    .editor-header h1{margin:0;font-family:'Cinzel Decorative',cursive;font-size:16px;color:var(--gold);}
 
-    .btn2{
-      border:none; border-radius:12px;
-      padding:10px 14px; cursor:pointer;
-      background:var(--dark); color:#ffd700;
-      font-weight:800; font-size:12px;
-      transition:.15s;
-    }
-    .btn2:hover{background:#4a3510}
-    .btn2.alt{background:#5c4306; color:#fff}
+    /* TABS */
+    .tabs-nav{display:flex;background:#111;border-bottom:1px solid #333;flex-wrap:wrap;}
+    .tab-btn{flex:1;padding:9px 4px;background:none;border:none;color:#777;cursor:pointer;font-size:8px;text-transform:uppercase;font-weight:bold;letter-spacing:.5px;}
+    .tab-btn.active{color:var(--gold);border-bottom:2px solid var(--gold);background:rgba(212,175,55,0.05);}
+    .tab-content{flex:1;overflow-y:auto;padding:14px 16px;}
+    .tab-pane{display:none;}
+    .tab-pane.active{display:block;}
 
-    .out{
-      background:#1a1003;
-      color:#ffd700;
-      border-radius:12px;
-      padding:12px;
-      border:2px solid rgba(212,175,55,0.2);
-      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-      word-break:break-all;
-      white-space:pre-wrap;
-      max-height:220px;
-      overflow:auto;
-      font-size:11px;
-    }
-    .previewBox{
-      background:rgba(0,0,0,.06);
-      border:1px dashed rgba(212,175,55,0.3);
-      border-radius:14px;
-      padding:10px;
-    }
-    .previewFrame{
-      width:100%; height:580px;
-      border:0; border-radius:12px;
-      background:#000; display:block;
-    }
+    /* FIELDS */
+    .field-group{margin-bottom:10px;}
+    .field-group.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .field-group.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+    label{display:block;font-size:9px;color:var(--gold-dark);text-transform:uppercase;margin-bottom:3px;font-weight:bold;letter-spacing:.5px;}
+    input[type=text],input[type=number],textarea,select{width:100%;background:#000;border:1px solid #333;padding:7px;color:#fff;border-radius:6px;font-size:11px;}
+    input[type=text]:focus,input[type=number]:focus,textarea:focus,select:focus{border-color:var(--gold);outline:none;}
+    input[type=color]{height:30px;padding:2px;cursor:pointer;width:100%;border-radius:6px;border:1px solid #333;background:#000;}
+    input[type=range]{-webkit-appearance:none;width:100%;background:linear-gradient(to right,var(--gold-dark),var(--gold));height:4px;border-radius:4px;cursor:pointer;border:none;outline:none;}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:var(--gold);border-radius:50%;border:2px solid #000;cursor:pointer;}
+    input[type=checkbox]{width:15px;height:15px;accent-color:var(--gold);cursor:pointer;}
+    h3{font-size:9px;color:#fff;text-transform:uppercase;border-bottom:1px solid #333;padding-bottom:4px;margin:12px 0 8px 0;letter-spacing:.8px;}
+    textarea{min-height:90px;resize:vertical;font-family:monospace;font-size:11px;}
+    .help{font-size:9px;color:#555;margin-top:3px;line-height:1.4;}
+    .check-row{display:flex;align-items:center;gap:7px;margin-bottom:8px;cursor:pointer;font-size:11px;color:#aaa;}
 
-    .url-preview{
-      max-width:100%; max-height:60px;
-      border-radius:8px; margin-top:6px;
-      border:1px solid rgba(212,175,55,0.3);
-      background:rgba(0,0,0,0.03);
-    }
+    /* PRESET BUTTONS */
+    .presets{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+    .preset-btn{padding:7px 12px;border-radius:8px;cursor:pointer;font-size:10px;font-weight:700;border:2px solid transparent;transition:.15s;}
+    .preset-btn:hover{transform:scale(1.03);}
+    .preset-btn.active{border-color:var(--gold);box-shadow:0 0 10px rgba(212,175,55,0.4);}
 
-    .q-row{
-      display:grid;
-      grid-template-columns:30px 1fr 200px 30px;
-      gap:8px;
-      align-items:center;
-      padding:8px 0;
-      border-bottom:1px solid rgba(212,175,55,0.15);
-    }
-    .q-row:last-child{border-bottom:none}
-    .q-num{
-      width:28px; height:28px;
-      background:var(--primary);
-      color:white;
-      border-radius:50%;
-      display:flex; align-items:center; justify-content:center;
-      font-size:12px; font-weight:900;
-    }
-    .q-del{
-      width:26px; height:26px;
-      border:none; background:var(--accent);
-      color:white; border-radius:8px;
-      cursor:pointer; font-size:14px; font-weight:bold;
-      display:flex; align-items:center; justify-content:center;
-    }
-    .q-del:hover{background:#e74c3c}
-    .q-input{padding:8px; font-size:12px}
+    /* WHEEL OPTION TAGS */
+    .opt-tag{display:inline-flex;align-items:center;gap:4px;background:#222;border:1px solid #444;border-radius:6px;padding:4px 8px;font-size:11px;margin:2px;}
+    .opt-tag .opt-del{cursor:pointer;color:var(--red);font-weight:bold;font-size:13px;}
 
-    .opt-tag{
-      display:inline-flex; align-items:center; gap:4px;
-      background:var(--sand);
-      border:1px solid rgba(212,175,55,0.3);
-      border-radius:8px;
-      padding:5px 10px;
-      font-size:12px;
-      margin:3px;
-    }
-    .opt-tag .opt-del{
-      cursor:pointer; color:var(--accent);
-      font-weight:bold; margin-left:4px;
-      font-size:14px;
-    }
-    .opt-tag .opt-del:hover{color:#e74c3c}
+    /* Q ROW */
+    .q-row{display:grid;grid-template-columns:24px 1fr 160px 24px;gap:6px;align-items:center;padding:7px 0;border-bottom:1px solid #222;}
+    .q-row:last-child{border-bottom:none;}
+    .q-num{width:22px;height:22px;background:var(--gold);color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;}
+    .q-del{width:22px;height:22px;border:none;background:var(--red);color:white;border-radius:6px;cursor:pointer;font-size:12px;font-weight:bold;display:flex;align-items:center;justify-content:center;}
+    .q-input{padding:6px;font-size:11px;background:#000;border:1px solid #333;color:#fff;border-radius:6px;}
 
-    .footer{
-      text-align:center;
-      margin-top:18px;
-      color:rgba(255,255,255,.5);
-      font-size:11px;
-      letter-spacing:.12em;
-      text-transform:uppercase;
-    }
+    /* BOTTOM AREA */
+    .size-bar{padding:10px 14px;background:#111;border-top:1px solid #333;}
+    .size-bar label{color:#666;}
+    .size-bar .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:5px;}
+    .btn-group{display:flex;gap:8px;padding:10px 14px;background:#111;border-top:1px solid #333;}
+    .btn-action{flex:1;padding:11px;border:none;border-radius:8px;cursor:pointer;font-family:'Cinzel Decorative',cursive;font-weight:bold;font-size:10px;transition:.1s;}
+    .btn-gold{background:var(--gold);color:#000;}
+    .btn-copy{background:#333;color:#fff;}
+    .studio-footer{padding:8px 14px;background:var(--bg-dark);text-align:center;border-top:1px solid #333;display:flex;flex-direction:column;align-items:center;gap:3px;}
+    .footer-logo-img{height:36px;object-fit:contain;}
+    .footer-brand-text{font-family:'Oswald',sans-serif;text-transform:uppercase;font-size:10px;letter-spacing:1.5px;color:#fff;margin:0;}
+    .footer-brand-text span{color:var(--gold);}
+    .footer-copyright{font-size:7px;color:#444;margin:0;text-transform:uppercase;}
 
-    input[type=range]{
-      -webkit-appearance:none; width:100%;
-      background:linear-gradient(to right,#d4af37,#8b6914);
-      height:5px; border-radius:5px; cursor:pointer;
-      border:none; outline:none;
-    }
-    input[type=range]::-webkit-slider-thumb{
-      -webkit-appearance:none;
-      width:16px; height:16px;
-      background:#ffd700;
-      border-radius:50%;
-      border:2px solid var(--dark);
-      cursor:pointer;
-    }
-
-    .color-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-    .color-row label{min-width:140px;flex-shrink:0}
-    .color-row input[type=color]{
-      width:40px;height:32px;border:2px solid #e0d5b8;border-radius:8px;
-      cursor:pointer;padding:2px;background:#fff;
-    }
-    .color-row input[type=color]::-webkit-color-swatch-wrapper{padding:0}
-    .color-row input[type=color]::-webkit-color-swatch{border:none;border-radius:4px}
-    .color-hex{width:90px;padding:6px;font-size:11px;font-family:monospace;border:2px solid #e0d5b8;border-radius:8px;text-align:center}
-
-    .slider-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-    .slider-row label{min-width:140px;flex-shrink:0}
-    .slider-row input[type=range]{flex:1;max-width:200px}
-    .slider-val{font-size:12px;font-weight:700;color:var(--dark);min-width:40px}
-
-    .style-presets{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-    .style-preset{
-      padding:10px 18px;border-radius:12px;cursor:pointer;
-      font-size:12px;font-weight:700;transition:.15s;
-      border:2px solid transparent;text-align:center;min-width:80px;
-    }
-    .style-preset:hover{transform:scale(1.03)}
-    .style-preset.active{border-color:#D4AF37;box-shadow:0 0 12px rgba(212,175,55,0.4)}
+    /* RIGHT PREVIEW */
+    .preview-side{flex:1;background:#050505;display:flex;flex-direction:column;padding:12px;}
+    .preview-frame-container{flex:1;background:#000;border-radius:10px;border:1px solid #222;overflow:hidden;}
+    iframe{width:100%;height:100%;border:none;}
   </style>
 </head>
 <body>
-
-<div class="bg-deco" style="left:8%; animation-duration:28s;">⚙️</div>
-<div class="bg-deco" style="left:75%; animation-duration:32s; animation-delay:-8s;">🎯</div>
-<div class="bg-deco" style="left:35%; animation-duration:24s; animation-delay:-14s;">✨</div>
-<div class="bg-deco" style="left:55%; animation-duration:30s; animation-delay:-4s;">🎮</div>
-
-<div class="wrap">
-  <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:6px">
-    <h1 style="margin:0">🎡 WHEEL OF WISDOM <span style="font-size:14px; color:var(--accent)">// EDITOR</span></h1>
-  </div>
-  <div class="sub" id="subText">Редактор генерирует <b>&lt;iframe srcdoc="..."&gt;</b> с полным HTML игры для встраивания в Genially.</div>
-
-  <div class="topbar">
-    <div class="pill">
-      <label id="lblLang">Язык</label>
-      <select id="uiLang" style="width:auto; padding:6px 10px; border-radius:8px; border:1px solid #d4af37; font-size:12px">
-        <option value="ru" selected>Русский</option>
-        <option value="en">English</option>
-      </select>
-      <label style="margin-left:10px; display:flex; align-items:center; gap:6px;">
-        <input type="checkbox" id="transparentBg" style="width:16px;height:16px;">
-        <span id="lblTransparent" style="font-size:11px">Прозрачный фон</span>
-      </label>
-    </div>
-    <div class="pill">
-      <button class="btn2" id="btnGenerate" onclick="generate()">СОЗДАТЬ</button>
-      <button class="btn2 alt" id="btnCopy" onclick="copyOut()">Скопировать</button>
-      <button class="btn2 alt" id="btnDownload" onclick="downloadHtml()">Скачать HTML</button>
-    </div>
-  </div>
-
-  <!-- TEXTS -->
-  <div class="card">
-    <h2>📜 <span id="tUi">Тексты интерфейса</span></h2>
-    <div class="grid3">
-      <div class="mb8">
-        <label id="lTitle">Название игры</label>
-        <input id="ui_title" type="text" value="Wheel of Wisdom">
-      </div>
-      <div class="mb8">
-        <label id="lSubtitle">Подзаголовок</label>
-        <input id="ui_subtitle" type="text" value="Колесо мудрости">
-      </div>
-      <div class="mb8">
-        <label id="lStart">Кнопка Старт</label>
-        <input id="ui_start" type="text" value="Start">
-      </div>
-    </div>
-    <div class="grid3">
-      <div class="mb8">
-        <label id="lVictoryTitle">Текст победы (заголовок)</label>
-        <input id="ui_victory_title" type="text" value="ALL TASKS COMPLETED!">
-      </div>
-      <div class="mb8">
-        <label id="lVictorySub">Текст победы (подзаг.)</label>
-        <input id="ui_victory_sub" type="text" value="YOU ARE A TRUE CHAMPION!">
-      </div>
-      <div class="mb8">
-        <label id="lAgain">Кнопка «Ещё раз»</label>
-        <input id="ui_again" type="text" value="Play Again">
-      </div>
-    </div>
-    <div class="grid2">
-      <div class="mb8">
-        <label id="lUnlockBtn">Кнопка ответа</label>
-        <input id="ui_unlock" type="text" value="Check Answer">
-      </div>
-      <div class="mb8">
-        <label id="lBlankChar">Заполнитель пропуска</label>
-        <input id="ui_blank" type="text" value="?">
-      </div>
-    </div>
-  </div>
-
-  <!-- VISUAL ASSETS -->
-  <div class="card">
-    <h2>🖼️ <span id="tImages">Визуальное оформление (URL картинок)</span></h2>
-    <div class="help" id="hImages">Вставьте прямые ссылки на картинки (PNG, JPG, GIF, WebP). Оставьте пустым — будет стандартный вид.</div>
-
-    <div class="grid2" style="margin-top:12px">
-      <div class="mb8">
-        <label id="lBg">🌄 Фон игрового поля</label>
-        <input id="url_bg" type="text" placeholder="https://example.com/background.png" oninput="previewUrl(this,'prev_bg')">
-        <img id="prev_bg" class="url-preview" style="display:none">
-      </div>
-      <div class="mb8">
-        <label id="lStartBg">🎬 Фон стартового экрана</label>
-        <input id="url_start_bg" type="text" placeholder="https://..." oninput="previewUrl(this,'prev_start_bg')">
-        <img id="prev_start_bg" class="url-preview" style="display:none">
-      </div>
+<div class="app-container">
+  <!-- LEFT PANEL -->
+  <div class="editor-side">
+    <div class="editor-header"><h1>🎡 WHEEL OF WISDOM</h1></div>
+    <div class="tabs-nav">
+      <button class="tab-btn active" id="tbtn-texts">Тексты</button>
+      <button class="tab-btn" id="tbtn-images">Картинки</button>
+      <button class="tab-btn" id="tbtn-style">Стиль</button>
+      <button class="tab-btn" id="tbtn-questions">Задания</button>
+      <button class="tab-btn" id="tbtn-wheel">Колесо</button>
+      <button class="tab-btn" id="tbtn-audio">Звуки</button>
     </div>
 
-    <div class="grid2">
-      <div class="mb8">
-        <label id="lVictoryBg">🏆 Фон экрана победы</label>
-        <input id="url_victory_bg" type="text" placeholder="https://..." oninput="previewUrl(this,'prev_victory_bg')">
-        <img id="prev_victory_bg" class="url-preview" style="display:none">
-      </div>
-      <div class="mb8"></div>
-    </div>
+    <div class="tab-content">
 
-    <div style="border-top:1px solid rgba(212,175,55,0.2);margin:14px 0;padding-top:14px">
-      <label style="font-size:13px;color:var(--dark)">🎡 Колесо</label>
-    </div>
-    <div class="grid3">
-      <div class="mb8">
-        <label id="lWheelBg">Фон колеса (круглый)</label>
-        <input id="url_wheel_bg" type="text" placeholder="https://..." oninput="previewUrl(this,'prev_wheel_bg')">
-        <img id="prev_wheel_bg" class="url-preview" style="display:none">
+      <!-- TAB: ТЕКСТЫ -->
+      <div id="tab-texts" class="tab-pane active">
+        <h3>Экран старта</h3>
+        <div class="field-group row2">
+          <div><label>Название</label><input id="ui_title" type="text" value="Wheel of Wisdom"></div>
+          <div><label>Подзаголовок</label><input id="ui_subtitle" type="text" value="Колесо мудрости"></div>
+        </div>
+        <div class="field-group row2">
+          <div><label>Кнопка Старт</label><input id="ui_start" type="text" value="Start"></div>
+          <div><label>Заполнитель пропуска</label><input id="ui_blank" type="text" value="?"></div>
+        </div>
+        <h3>Экран победы</h3>
+        <div class="field-group row2">
+          <div><label>Заголовок победы</label><input id="ui_victory_title" type="text" value="ALL TASKS COMPLETED!"></div>
+          <div><label>Подзаголовок победы</label><input id="ui_victory_sub" type="text" value="YOU ARE A TRUE CHAMPION!"></div>
+        </div>
+        <div class="field-group row2">
+          <div><label>Кнопка «Ещё раз»</label><input id="ui_again" type="text" value="Play Again"></div>
+          <div><label>Кнопка ответа</label><input id="ui_unlock" type="text" value="Check Answer"></div>
+        </div>
+        <h3>Размер iframe в Genially</h3>
+        <div class="help">Задайте размер окна игры на слайде. Игра масштабируется автоматически.</div>
+        <div class="field-group row2" style="margin-top:6px;">
+          <div><label>Ширина</label><input id="iframe_w" type="text" value="100%"></div>
+          <div><label>Высота (px)</label><input id="iframe_h" type="number" value="600"></div>
+        </div>
+        <label class="check-row" style="margin-top:6px;"><input type="checkbox" id="transparentBg"><span>Прозрачный фон</span></label>
       </div>
-      <div class="mb8">
-        <label id="lWheelFrame">Рамка / обод колеса</label>
-        <input id="url_wheel_frame" type="text" placeholder="https://..." oninput="previewUrl(this,'prev_wheel_frame')">
-        <img id="prev_wheel_frame" class="url-preview" style="display:none">
-      </div>
-      <div class="mb8">
-        <label id="lPointer">Указатель (стрелка)</label>
-        <input id="url_pointer" type="text" placeholder="https://..." oninput="previewUrl(this,'prev_pointer')">
-        <img id="prev_pointer" class="url-preview" style="display:none">
-      </div>
-    </div>
 
-    <div style="border-top:1px solid rgba(212,175,55,0.2);margin:14px 0;padding-top:14px">
-      <label style="font-size:13px;color:var(--dark)">🃏 Карточки и элементы</label>
-    </div>
-    <div class="grid3">
-      <div class="mb8">
-        <label id="lCardBg">Фон карточки задания</label>
-        <input id="url_card_bg" type="text" placeholder="https://..." oninput="previewUrl(this,'prev_card_bg')">
-        <img id="prev_card_bg" class="url-preview" style="display:none">
+      <!-- TAB: КАРТИНКИ -->
+      <div id="tab-images" class="tab-pane">
+        <h3>Фоны</h3>
+        <div class="field-group"><label>🌄 Фон игры (URL)</label><input id="url_bg" type="text" placeholder="https://..."></div>
+        <div class="field-group"><label>🎬 Фон стартового экрана (URL)</label><input id="url_start_bg" type="text" placeholder="https://..."></div>
+        <div class="field-group"><label>🏆 Фон экрана победы (URL)</label><input id="url_victory_bg" type="text" placeholder="https://..."></div>
+        <h3>Колесо</h3>
+        <div class="field-group"><label>🎡 Фон колеса (круглый, URL)</label><input id="url_wheel_bg" type="text" placeholder="https://..."></div>
+        <div class="field-group"><label>🔘 Рамка / обод колеса (URL)</label><input id="url_wheel_frame" type="text" placeholder="https://..."></div>
+        <div class="field-group"><label>▶ Указатель/стрелка (URL)</label><input id="url_pointer" type="text" placeholder="https://..."></div>
+        <h3>Карточки и кнопки</h3>
+        <div class="field-group"><label>🃏 Фон карточки задания (URL)</label><input id="url_card_bg" type="text" placeholder="https://..."></div>
+        <div class="field-group"><label>➔ Стрелка между карточкой и колесом (URL)</label><input id="url_arrow" type="text" placeholder="https://...">
+          <label class="check-row" style="margin-top:5px;"><input type="checkbox" id="chk_arrow_pulse" checked><span>Пульсация стрелки</span></label>
+        </div>
+        <div class="field-group"><label>📊 Иконка прогресса (URL)</label><input id="url_progress" type="text" placeholder="https://..."></div>
+        <div class="field-group"><label>🎆 Частицы победы (URL)</label><input id="url_particle" type="text" placeholder="https://..."></div>
+        <div class="field-group"><label>🖱 Фон кнопки ответа (URL)</label><input id="url_btn_bg" type="text" placeholder="https://..."></div>
       </div>
-      <div class="mb8">
-        <label id="lArrow">Стрелка (карточка → колесо)</label>
-        <input id="url_arrow" type="text" placeholder="https://..." oninput="previewUrl(this,'prev_arrow')">
-        <img id="prev_arrow" class="url-preview" style="display:none">
-        <label style="margin-top:6px;display:flex;align-items:center;gap:6px;font-size:11px">
-          <input type="checkbox" id="chk_arrow_pulse" checked style="width:15px;height:15px;">
-          <span>Пульсация стрелки</span>
-        </label>
-      </div>
-      <div class="mb8">
-        <label id="lProgressIcon">Иконка прогресса (заполненная)</label>
-        <input id="url_progress" type="text" placeholder="https://..." oninput="previewUrl(this,'prev_progress')">
-        <img id="prev_progress" class="url-preview" style="display:none">
-      </div>
-    </div>
 
-    <div class="grid2">
-      <div class="mb8">
-        <label id="lBtnBg">Фон кнопки ответа</label>
-        <input id="url_btn_bg" type="text" placeholder="https://..." oninput="previewUrl(this,'prev_btn_bg')">
-        <img id="prev_btn_bg" class="url-preview" style="display:none">
-      </div>
-      <div class="mb8">
-        <label id="lParticle">Частицы победы (иконка)</label>
-        <input id="url_particle" type="text" placeholder="https://..." oninput="previewUrl(this,'prev_particle')">
-        <img id="prev_particle" class="url-preview" style="display:none">
-      </div>
-    </div>
-  </div>
-
-  <!-- BUTTON STYLES & COLORS -->
-  <div class="card">
-    <h2>🎨 <span id="tStyle">Стиль кнопок и цвета</span></h2>
-
-    <div style="border-bottom:1px solid rgba(212,175,55,0.2);padding-bottom:12px;margin-bottom:12px">
-      <label>Стиль кнопок (пресет)</label>
-      <div class="style-presets" id="btn-presets">
-        <div class="style-preset active" data-style="gold-classic" onclick="selectBtnStyle(this)" style="background:linear-gradient(#ffd700,#b8860b);color:#1a1403;box-shadow:0 4px 0 #5c4306;">Золото</div>
-        <div class="style-preset" data-style="flat-dark" onclick="selectBtnStyle(this)" style="background:#1a1403;color:#ffd700;">Тёмная</div>
-        <div class="style-preset" data-style="flat-white" onclick="selectBtnStyle(this)" style="background:rgba(255,255,255,0.9);color:#333;">Светлая</div>
-        <div class="style-preset" data-style="glass" onclick="selectBtnStyle(this)" style="background:rgba(255,255,255,0.15);color:#fff;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.3);">Стекло</div>
-        <div class="style-preset" data-style="outline-gold" onclick="selectBtnStyle(this)" style="background:transparent;color:#ffd700;border:2px solid #ffd700;">Контур</div>
-        <div class="style-preset" data-style="red-3d" onclick="selectBtnStyle(this)" style="background:linear-gradient(#e74c3c,#c0392b);color:#fff;box-shadow:0 4px 0 #922b21;">Красная 3D</div>
-        <div class="style-preset" data-style="blue-3d" onclick="selectBtnStyle(this)" style="background:linear-gradient(#3498db,#2980b9);color:#fff;box-shadow:0 4px 0 #1a5276;">Синяя 3D</div>
-        <div class="style-preset" data-style="green-3d" onclick="selectBtnStyle(this)" style="background:linear-gradient(#2ecc71,#27ae60);color:#fff;box-shadow:0 4px 0 #1e8449;">Зелёная 3D</div>
-        <div class="style-preset" data-style="purple-neon" onclick="selectBtnStyle(this)" style="background:#2d1b69;color:#e0aaff;box-shadow:0 0 12px #9b59b6;">Неон</div>
-        <div class="style-preset" data-style="custom" onclick="selectBtnStyle(this)" style="background:#fff;color:#333;border:2px dashed #999;">Свой ▼</div>
-      </div>
-    </div>
-
-    <div style="border-bottom:1px solid rgba(212,175,55,0.2);padding-bottom:12px;margin-bottom:12px">
-      <label>🎨 Цвета</label>
-      <div class="grid2">
-        <div>
-          <div class="color-row">
-            <label>Заголовок игры</label>
-            <input type="color" id="clr_title" value="#ffd700" oninput="syncHex(this,'hex_title')">
-            <input class="color-hex" id="hex_title" value="#ffd700" oninput="syncColor(this,'clr_title')">
+      <!-- TAB: СТИЛЬ -->
+      <div id="tab-style" class="tab-pane">
+        <h3>Стиль кнопок</h3>
+        <div class="presets" id="btn-presets">
+          <div class="preset-btn active" data-style="gold-classic" style="background:linear-gradient(#ffd700,#b8860b);color:#1a1403;">Золото</div>
+          <div class="preset-btn" data-style="flat-dark" style="background:#1a1403;color:#ffd700;">Тёмная</div>
+          <div class="preset-btn" data-style="flat-white" style="background:rgba(255,255,255,0.9);color:#333;">Светлая</div>
+          <div class="preset-btn" data-style="glass" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);">Стекло</div>
+          <div class="preset-btn" data-style="outline-gold" style="background:transparent;color:#ffd700;border:2px solid #ffd700;">Контур</div>
+          <div class="preset-btn" data-style="red-3d" style="background:linear-gradient(#e74c3c,#c0392b);color:#fff;">Красная</div>
+          <div class="preset-btn" data-style="blue-3d" style="background:linear-gradient(#3498db,#2980b9);color:#fff;">Синяя</div>
+          <div class="preset-btn" data-style="green-3d" style="background:linear-gradient(#2ecc71,#27ae60);color:#fff;">Зелёная</div>
+          <div class="preset-btn" data-style="purple-neon" style="background:#2d1b69;color:#e0aaff;">Неон</div>
+        </div>
+        <h3>Цвета</h3>
+        <div class="field-group row2">
+          <div><label>Заголовок</label><input type="color" id="clr_title" value="#ffd700"></div>
+          <div><label>Текст кнопок</label><input type="color" id="clr_btn_text" value="#1a1403"></div>
+        </div>
+        <div class="field-group row2">
+          <div><label>Кнопка (цвет 1)</label><input type="color" id="clr_btn_bg1" value="#ffd700"></div>
+          <div><label>Кнопка (цвет 2)</label><input type="color" id="clr_btn_bg2" value="#b8860b"></div>
+        </div>
+        <div class="field-group row2">
+          <div><label>Обводка кнопок</label><input type="color" id="clr_btn_border" value="#5c4306"></div>
+          <div><label>Текст на колесе</label><input type="color" id="clr_wheel_text" value="#5a4814"></div>
+        </div>
+        <div class="field-group row2">
+          <div><label>Активный на колесе</label><input type="color" id="clr_wheel_active" value="#ffffff"></div>
+          <div><label>Текст карточки</label><input type="color" id="clr_card_text" value="#1a1403"></div>
+        </div>
+        <h3>Шрифты</h3>
+        <div class="field-group row2">
+          <div><label>Заголовки</label>
+            <select id="sel_font_title">
+              <option value="'Cinzel Decorative',cursive" selected>Cinzel Decorative</option>
+              <option value="'Fredoka One',cursive">Fredoka One</option>
+              <option value="'Playfair Display',serif">Playfair Display</option>
+              <option value="'Lobster',cursive">Lobster</option>
+              <option value="'Orbitron',sans-serif">Orbitron</option>
+              <option value="'Press Start 2P',monospace">Press Start 2P</option>
+              <option value="'Righteous',cursive">Righteous</option>
+              <option value="'Russo One',sans-serif">Russo One</option>
+              <option value="'Bungee',cursive">Bungee</option>
+            </select>
           </div>
-          <div class="color-row">
-            <label>Текст на кнопках</label>
-            <input type="color" id="clr_btn_text" value="#1a1403" oninput="syncHex(this,'hex_btn_text')">
-            <input class="color-hex" id="hex_btn_text" value="#1a1403" oninput="syncColor(this,'clr_btn_text')">
-          </div>
-          <div class="color-row">
-            <label>Фон кнопок (цвет 1)</label>
-            <input type="color" id="clr_btn_bg1" value="#ffd700" oninput="syncHex(this,'hex_btn_bg1')">
-            <input class="color-hex" id="hex_btn_bg1" value="#ffd700" oninput="syncColor(this,'clr_btn_bg1')">
-          </div>
-          <div class="color-row">
-            <label>Фон кнопок (цвет 2)</label>
-            <input type="color" id="clr_btn_bg2" value="#b8860b" oninput="syncHex(this,'hex_btn_bg2')">
-            <input class="color-hex" id="hex_btn_bg2" value="#b8860b" oninput="syncColor(this,'clr_btn_bg2')">
+          <div><label>Основной текст</label>
+            <select id="sel_font_body">
+              <option value="'Philosopher',sans-serif" selected>Philosopher</option>
+              <option value="'Montserrat',sans-serif">Montserrat</option>
+              <option value="'Roboto',sans-serif">Roboto</option>
+              <option value="'Open Sans',sans-serif">Open Sans</option>
+              <option value="'Lora',serif">Lora</option>
+              <option value="'Comfortaa',cursive">Comfortaa</option>
+              <option value="'Nunito',sans-serif">Nunito</option>
+              <option value="'Exo 2',sans-serif">Exo 2</option>
+            </select>
           </div>
         </div>
-        <div>
-          <div class="color-row">
-            <label>Обводка кнопок</label>
-            <input type="color" id="clr_btn_border" value="#5c4306" oninput="syncHex(this,'hex_btn_border')">
-            <input class="color-hex" id="hex_btn_border" value="#5c4306" oninput="syncColor(this,'clr_btn_border')">
+        <h3>Параметры</h3>
+        <div class="field-group row3">
+          <div><label>Скругление кнопок</label><input type="number" id="sld_btn_radius" value="15" min="0" max="50"></div>
+          <div><label>Свечение заголовка</label><input type="number" id="sld_title_glow" value="30" min="0" max="50"></div>
+          <div><label>Свечение кнопок</label><input type="number" id="sld_btn_glow" value="0" min="0" max="40"></div>
+        </div>
+        <div class="field-group row3">
+          <div><label>Прозрачность кнопок</label><input type="number" id="sld_btn_opacity" value="1" min="0" max="1" step="0.05"></div>
+          <div><label>Тень смещение</label><input type="number" id="sld_shadow_size" value="2" min="0" max="10"></div>
+          <div><label>Тень мягкость</label><input type="number" id="sld_shadow_blur" value="6" min="0" max="20"></div>
+        </div>
+        <div class="field-group row3">
+          <div><label>Цвет тени</label><input type="color" id="clr_shadow" value="#000000"></div>
+          <div><label>Рамка карточки</label><input type="color" id="clr_card_border" value="#ffd700"></div>
+          <div><label>Толщина рамки</label><input type="number" id="sld_card_border_width" value="3" min="0" max="8"></div>
+        </div>
+        <div class="field-group row3">
+          <div><label>Подложка актив. слова</label><input type="color" id="clr_active_bg" value="#000000"></div>
+          <div><label>Прозрачность подложки</label><input type="number" id="sld_active_bg_opacity" value="0.6" min="0" max="1" step="0.05"></div>
+          <div><label>Скругление подложки</label><input type="number" id="sld_active_bg_radius" value="8" min="0" max="20"></div>
+        </div>
+      </div>
+
+      <!-- TAB: ЗАДАНИЯ -->
+      <div id="tab-questions" class="tab-pane">
+        <h3>Быстрый ввод списком</h3>
+        <div class="help">Формат: <b>вопрос | ответ</b> (каждая строка). Пропуск: <b>___</b></div>
+        <textarea id="batch_input" style="margin-top:6px;" placeholder="The cat ___ on the mat. | is&#10;___ you see the light? | can"></textarea>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <button class="btn-action btn-gold" id="btn-batch-add" style="font-family:'Montserrat',sans-serif;font-size:10px;padding:8px;">+ Добавить</button>
+          <button class="btn-action btn-copy" id="btn-batch-replace" style="font-family:'Montserrat',sans-serif;font-size:10px;padding:8px;">🔄 Заменить всё</button>
+          <button class="btn-action btn-copy" id="btn-demo-q" style="font-family:'Montserrat',sans-serif;font-size:10px;padding:8px;">Пример</button>
+        </div>
+        <h3 style="margin-top:14px;">Список заданий</h3>
+        <div id="questions-list"></div>
+        <button class="btn-action btn-copy" id="btn-add-q" style="margin-top:8px;font-family:'Montserrat',sans-serif;font-size:10px;padding:8px;width:100%;">+ Добавить задание</button>
+      </div>
+
+      <!-- TAB: КОЛЕСО -->
+      <div id="tab-wheel" class="tab-pane">
+        <div style="display:flex;gap:16px;margin-bottom:10px;">
+          <label class="check-row"><input type="radio" name="wheel_mode" value="auto" checked id="wheel_auto"><span>Авто (из заданий)</span></label>
+          <label class="check-row"><input type="radio" name="wheel_mode" value="manual" id="wheel_manual"><span>Вручную</span></label>
+        </div>
+        <div id="wheel-auto-info" class="help" style="padding:6px;background:rgba(212,175,55,0.08);border-radius:6px;margin-bottom:8px;">✅ На колесе будут все правильные ответы. Добавьте лишние варианты ниже для усложнения.</div>
+        <div id="wheel-options-container" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px;"></div>
+        <div id="wheel-extra-box" style="margin-top:8px;">
+          <label style="font-size:9px;color:#666;display:block;margin-bottom:4px;">Дополнительные неправильные варианты</label>
+          <div style="display:flex;gap:6px;">
+            <input type="text" id="new_wheel_option" placeholder="Неправильный вариант..." style="flex:1;padding:6px;font-size:11px;">
+            <button class="btn-action btn-copy" id="btn-add-extra" style="font-family:'Montserrat',sans-serif;font-size:10px;padding:6px 10px;">+</button>
           </div>
-          <div class="color-row">
-            <label>Текст на колесе</label>
-            <input type="color" id="clr_wheel_text" value="#5a4814" oninput="syncHex(this,'hex_wheel_text')">
-            <input class="color-hex" id="hex_wheel_text" value="#5a4814" oninput="syncColor(this,'clr_wheel_text')">
-          </div>
-          <div class="color-row">
-            <label>Активный на колесе</label>
-            <input type="color" id="clr_wheel_active" value="#ffffff" oninput="syncHex(this,'hex_wheel_active')">
-            <input class="color-hex" id="hex_wheel_active" value="#ffffff" oninput="syncColor(this,'clr_wheel_active')">
-          </div>
-          <div class="color-row">
-            <label>Текст на карточке</label>
-            <input type="color" id="clr_card_text" value="#1a1403" oninput="syncHex(this,'hex_card_text')">
-            <input class="color-hex" id="hex_card_text" value="#1a1403" oninput="syncColor(this,'clr_card_text')">
+        </div>
+        <div id="wheel-manual-box" style="margin-top:8px;display:none;">
+          <label style="font-size:9px;color:#666;display:block;margin-bottom:4px;">Все варианты колеса</label>
+          <div style="display:flex;gap:6px;">
+            <input type="text" id="new_wheel_option_manual" placeholder="Вариант..." style="flex:1;padding:6px;font-size:11px;">
+            <button class="btn-action btn-copy" id="btn-add-manual" style="font-family:'Montserrat',sans-serif;font-size:10px;padding:6px 10px;">+</button>
+            <button class="btn-action btn-gold" id="btn-demo-w" style="font-family:'Montserrat',sans-serif;font-size:9px;padding:6px 8px;">Пример</button>
           </div>
         </div>
       </div>
-    </div>
 
-    <div>
-      <label>⚙️ Параметры</label>
-      <div style="margin-top:8px">
-
-        <div style="border-bottom:1px solid rgba(212,175,55,0.15);padding-bottom:10px;margin-bottom:10px">
-          <label>🔤 Шрифты</label>
-          <div class="grid2">
-            <div>
-              <label style="font-size:10px">Заголовки / кнопки</label>
-              <select id="sel_font_title" style="padding:8px;font-size:12px">
-                <option value="'Cinzel Decorative',cursive" selected>Cinzel Decorative</option>
-                <option value="'Fredoka One',cursive">Fredoka One</option>
-                <option value="'Playfair Display',serif">Playfair Display</option>
-                <option value="'Lobster',cursive">Lobster</option>
-                <option value="'Orbitron',sans-serif">Orbitron</option>
-                <option value="'Press Start 2P',monospace">Press Start 2P</option>
-                <option value="'Creepster',cursive">Creepster</option>
-                <option value="'Righteous',cursive">Righteous</option>
-                <option value="'Russo One',sans-serif">Russo One</option>
-                <option value="'Bungee',cursive">Bungee</option>
-              </select>
-            </div>
-            <div>
-              <label style="font-size:10px">Основной текст</label>
-              <select id="sel_font_body" style="padding:8px;font-size:12px">
-                <option value="'Philosopher',sans-serif" selected>Philosopher</option>
-                <option value="'Montserrat',sans-serif">Montserrat</option>
-                <option value="'Roboto',sans-serif">Roboto</option>
-                <option value="'Open Sans',sans-serif">Open Sans</option>
-                <option value="'Lora',serif">Lora</option>
-                <option value="'PT Serif',serif">PT Serif</option>
-                <option value="'Comfortaa',cursive">Comfortaa</option>
-                <option value="'Nunito',sans-serif">Nunito</option>
-                <option value="'Exo 2',sans-serif">Exo 2</option>
-                <option value="'Jura',sans-serif">Jura</option>
-              </select>
-            </div>
+      <!-- TAB: ЗВУКИ -->
+      <div id="tab-audio" class="tab-pane">
+        <div class="help" style="margin-bottom:10px;">Встроенные звуки по умолчанию. Загрузите mp3-файл для замены.</div>
+        <div class="field-group">
+          <label>✅ Правильный ответ</label>
+          <div style="display:flex;gap:6px;margin-top:3px;">
+            <button class="btn-action btn-copy" id="play-correct" style="font-family:'Montserrat',sans-serif;font-size:10px;padding:5px 8px;">▶</button>
+            <input type="file" id="file_snd_correct" accept="audio/*" style="flex:1;font-size:10px;padding:4px;border:1px solid #333;background:#000;color:#fff;border-radius:4px;">
           </div>
+          <div class="help" id="snd_correct_status">встроенный ✓</div>
         </div>
-
-        <div style="border-bottom:1px solid rgba(212,175,55,0.15);padding-bottom:10px;margin-bottom:10px">
-          <label>🏷️ Подложка активного слова на колесе</label>
-          <div class="grid3">
-            <div class="color-row">
-              <label>Цвет подложки</label>
-              <input type="color" id="clr_active_bg" value="#000000" oninput="syncHex(this,'hex_active_bg')">
-              <input class="color-hex" id="hex_active_bg" value="#000000" oninput="syncColor(this,'clr_active_bg')">
-            </div>
-            <div class="slider-row">
-              <label>Прозрачность</label>
-              <input type="range" id="sld_active_bg_opacity" min="0" max="1" step="0.05" value="0.6" oninput="document.getElementById('val_active_bg_opacity').textContent=this.value">
-              <span class="slider-val" id="val_active_bg_opacity">0.6</span>
-            </div>
-            <div class="slider-row">
-              <label>Скругление</label>
-              <input type="range" id="sld_active_bg_radius" min="0" max="20" step="1" value="8" oninput="document.getElementById('val_active_bg_radius').textContent=this.value+'px'">
-              <span class="slider-val" id="val_active_bg_radius">8px</span>
-            </div>
+        <div class="field-group">
+          <label>❌ Неправильный ответ</label>
+          <div style="display:flex;gap:6px;margin-top:3px;">
+            <button class="btn-action btn-copy" id="play-wrong" style="font-family:'Montserrat',sans-serif;font-size:10px;padding:5px 8px;">▶</button>
+            <input type="file" id="file_snd_wrong" accept="audio/*" style="flex:1;font-size:10px;padding:4px;border:1px solid #333;background:#000;color:#fff;border-radius:4px;">
           </div>
+          <div class="help" id="snd_wrong_status">встроенный ✓</div>
         </div>
-
-        <div style="border-bottom:1px solid rgba(212,175,55,0.15);padding-bottom:10px;margin-bottom:10px">
-          <label>🌑 Тень текстов (общая)</label>
-          <div class="grid3">
-            <div class="slider-row"><label>Смещение</label><input type="range" id="sld_shadow_size" min="0" max="10" step="1" value="2" oninput="document.getElementById('val_shadow_size').textContent=this.value+'px'"><span class="slider-val" id="val_shadow_size">2px</span></div>
-            <div class="slider-row"><label>Мягкость</label><input type="range" id="sld_shadow_blur" min="0" max="20" step="1" value="6" oninput="document.getElementById('val_shadow_blur').textContent=this.value+'px'"><span class="slider-val" id="val_shadow_blur">6px</span></div>
-            <div class="color-row"><label>Цвет тени</label><input type="color" id="clr_shadow" value="#000000" oninput="syncHex(this,'hex_shadow')"><input class="color-hex" id="hex_shadow" value="#000000" oninput="syncColor(this,'clr_shadow')"></div>
+        <div class="field-group">
+          <label>🎡 Прокрутка колеса</label>
+          <div style="display:flex;gap:6px;margin-top:3px;">
+            <button class="btn-action btn-copy" id="play-tick" style="font-family:'Montserrat',sans-serif;font-size:10px;padding:5px 8px;">▶</button>
+            <input type="file" id="file_snd_tick" accept="audio/*" style="flex:1;font-size:10px;padding:4px;border:1px solid #333;background:#000;color:#fff;border-radius:4px;">
           </div>
+          <div class="help" id="snd_tick_status">встроенный ✓</div>
         </div>
-
-        <div style="border-bottom:1px solid rgba(212,175,55,0.15);padding-bottom:10px;margin-bottom:10px">
-          <label>🃏 Рамка активной карточки</label>
-          <div class="grid3">
-            <div class="color-row"><label>Цвет рамки</label><input type="color" id="clr_card_border" value="#ffd700" oninput="syncHex(this,'hex_card_border')"><input class="color-hex" id="hex_card_border" value="#ffd700" oninput="syncColor(this,'clr_card_border')"></div>
-            <div class="slider-row"><label>Толщина</label><input type="range" id="sld_card_border_width" min="0" max="8" step="1" value="3" oninput="document.getElementById('val_card_border_width').textContent=this.value+'px'"><span class="slider-val" id="val_card_border_width">3px</span></div>
-            <div class="slider-row"><label>Прозрачность</label><input type="range" id="sld_card_border_opacity" min="0" max="1" step="0.05" value="1" oninput="document.getElementById('val_card_border_opacity').textContent=this.value"><span class="slider-val" id="val_card_border_opacity">1</span></div>
+        <div class="field-group">
+          <label>🏆 Победа</label>
+          <div style="display:flex;gap:6px;margin-top:3px;">
+            <button class="btn-action btn-copy" id="play-victory" style="font-family:'Montserrat',sans-serif;font-size:10px;padding:5px 8px;">▶</button>
+            <input type="file" id="file_snd_victory" accept="audio/*" style="flex:1;font-size:10px;padding:4px;border:1px solid #333;background:#000;color:#fff;border-radius:4px;">
           </div>
-        </div>
-
-        <div class="slider-row">
-          <label>Прозрачность кнопок</label>
-          <input type="range" id="sld_btn_opacity" min="0" max="1" step="0.05" value="1" oninput="document.getElementById('val_btn_opacity').textContent=this.value">
-          <span class="slider-val" id="val_btn_opacity">1</span>
-        </div>
-        <div class="slider-row">
-          <label>Свечение кнопок</label>
-          <input type="range" id="sld_btn_glow" min="0" max="40" step="1" value="0" oninput="document.getElementById('val_btn_glow').textContent=this.value+'px'">
-          <span class="slider-val" id="val_btn_glow">0px</span>
-        </div>
-        <div class="slider-row">
-          <label>Скругление кнопок</label>
-          <input type="range" id="sld_btn_radius" min="0" max="50" step="1" value="15" oninput="document.getElementById('val_btn_radius').textContent=this.value+'px'">
-          <span class="slider-val" id="val_btn_radius">15px</span>
-        </div>
-        <div class="slider-row">
-          <label>Свечение заголовка</label>
-          <input type="range" id="sld_title_glow" min="0" max="50" step="1" value="30" oninput="document.getElementById('val_title_glow').textContent=this.value+'px'">
-          <span class="slider-val" id="val_title_glow">30px</span>
+          <div class="help" id="snd_victory_status">встроенный ✓</div>
         </div>
       </div>
+
+    </div><!-- end tab-content -->
+
+    <div class="btn-group">
+      <button class="btn-action btn-gold" id="btnGenerate">⚡ СОЗДАТЬ</button>
+      <button class="btn-action btn-copy" id="btnCopy">СКОПИРОВАТЬ</button>
+      <button class="btn-action btn-copy" id="btnDownload">↓ HTML</button>
+    </div>
+    <div class="studio-footer">
+      <img src="https://raw.githubusercontent.com/VeRa422/hidden_artifacts/main/logo.png" alt="Logo" class="footer-logo-img">
+      <p class="footer-brand-text"><span>ИГРОВОЙ</span> КВАРТАЛ</p>
+      <p class="footer-copyright">© Все права защищены</p>
+    </div>
+  <textarea id="hidden_output" style="display:none;"></textarea>
+</div><!-- end editor-side -->
+
+  <!-- RIGHT PREVIEW -->
+  <div class="preview-side">
+    <div class="preview-frame-container">
+      <iframe id="preview" allow="autoplay"></iframe>
     </div>
   </div>
-
-  <!-- SOUNDS -->
-  <div class="card">
-    <h2>🔊 <span id="tAudio">Звуки</span></h2>
-    <div class="help" id="hAudio">Встроенные звуки по умолчанию. Можно заменить — загрузите mp3-файл.</div>
-    <div class="grid4" style="margin-top:10px">
-      <div>
-        <label>✅ Правильный ответ</label>
-        <div class="row" style="margin-top:4px">
-          <button class="btn2" style="padding:6px 10px; font-size:11px" onclick="playDefaultSound('correct')">▶</button>
-          <input type="file" id="file_snd_correct" accept="audio/*" onchange="handleSoundUpload(this,'correct')" style="font-size:10px; padding:4px; border:1px solid #d4af37">
-        </div>
-        <div class="help" id="snd_correct_status">встроенный ✓</div>
-      </div>
-      <div>
-        <label>❌ Неправильный ответ</label>
-        <div class="row" style="margin-top:4px">
-          <button class="btn2" style="padding:6px 10px; font-size:11px" onclick="playDefaultSound('wrong')">▶</button>
-          <input type="file" id="file_snd_wrong" accept="audio/*" onchange="handleSoundUpload(this,'wrong')" style="font-size:10px; padding:4px; border:1px solid #d4af37">
-        </div>
-        <div class="help" id="snd_wrong_status">встроенный ✓</div>
-      </div>
-      <div>
-        <label>🎡 Прокрутка колеса</label>
-        <div class="row" style="margin-top:4px">
-          <button class="btn2" style="padding:6px 10px; font-size:11px" onclick="playDefaultSound('tick')">▶</button>
-          <input type="file" id="file_snd_tick" accept="audio/*" onchange="handleSoundUpload(this,'tick')" style="font-size:10px; padding:4px; border:1px solid #d4af37">
-        </div>
-        <div class="help" id="snd_tick_status">встроенный ✓</div>
-      </div>
-      <div>
-        <label>🏆 Победа</label>
-        <div class="row" style="margin-top:4px">
-          <button class="btn2" style="padding:6px 10px; font-size:11px" onclick="playDefaultSound('victory')">▶</button>
-          <input type="file" id="file_snd_victory" accept="audio/*" onchange="handleSoundUpload(this,'victory')" style="font-size:10px; padding:4px; border:1px solid #d4af37">
-        </div>
-        <div class="help" id="snd_victory_status">встроенный ✓</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- QUESTIONS: BATCH IMPORT -->
-  <div class="card">
-    <h2>📋 <span id="tBatch">Быстрый ввод списком</span></h2>
-    <div class="help" id="hBatch">Вставьте задания списком: каждая строка — <b>вопрос | ответ</b>. Используйте <b>___</b> для пропуска.</div>
-    <textarea id="batch_input" placeholder="The Sphinx ___ a lion body. | has got
-There ___ many secrets. | are
-___ you see the light? | can" style="margin-top:8px; min-height:150px"></textarea>
-    <div style="margin-top:10px; display:flex; gap:10px">
-      <button class="btn2" onclick="parseBatch()">📥 Разобрать и добавить</button>
-      <button class="btn2 alt" onclick="parseBatchReplace()">🔄 Разобрать и заменить всё</button>
-    </div>
-  </div>
-
-  <!-- QUESTIONS: INDIVIDUAL EDITING -->
-  <div class="card">
-    <h2>📝 <span id="tQuestions">Задания и ответы</span></h2>
-    <div class="help" id="hQuestions">Пропуск обозначается <b>___</b>. Ответ должен совпадать с одним из вариантов на колесе.</div>
-    <div id="questions-list" style="margin-top:10px"></div>
-    <div style="margin-top:10px; display:flex; gap:10px">
-      <button class="btn2" onclick="addQuestion()">+ Добавить задание</button>
-      <button class="btn2 alt" onclick="loadDemoQuestions()">Загрузить пример</button>
-    </div>
-  </div>
-
-  <!-- WHEEL OPTIONS -->
-  <div class="card">
-    <h2>🎡 <span id="tWheel">Варианты на колесе</span></h2>
-    <div class="help" id="hWheel">Варианты ответов на колесе. Правильные ответы из заданий добавляются автоматически.</div>
-
-    <div style="margin:10px 0;display:flex;gap:16px;align-items:center">
-      <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-        <input type="radio" name="wheel_mode" value="auto" checked onchange="toggleWheelMode()"> Автоматически из заданий
-      </label>
-      <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-        <input type="radio" name="wheel_mode" value="manual" onchange="toggleWheelMode()"> Вручную
-      </label>
-    </div>
-
-    <div id="wheel-auto-info" class="help" style="padding:8px;background:rgba(212,175,55,0.08);border-radius:8px;margin-bottom:8px">
-      ✅ На колесе будут все правильные ответы из заданий. Дополнительные неправильные варианты можно добавить ниже.
-    </div>
-
-    <div id="wheel-options-container" style="margin-top:6px; display:flex; flex-wrap:wrap; gap:4px"></div>
-
-    <div id="wheel-extra-box" style="margin-top:10px">
-      <label style="font-size:11px;margin-bottom:4px;display:block">Дополнительные неправильные варианты</label>
-      <div style="display:flex;gap:8px;align-items:center">
-        <input type="text" id="new_wheel_option" placeholder="Неправильный вариант..." style="width:200px; padding:8px; font-size:12px">
-        <button class="btn2" onclick="addWheelOption()">+ Добавить</button>
-      </div>
-    </div>
-
-    <div id="wheel-manual-box" style="margin-top:10px;display:none">
-      <label style="font-size:11px;margin-bottom:4px;display:block">Все варианты колеса (правильные + неправильные)</label>
-      <div style="display:flex;gap:8px;align-items:center">
-        <input type="text" id="new_wheel_option_manual" placeholder="Вариант..." style="width:200px; padding:8px; font-size:12px">
-        <button class="btn2" onclick="addWheelOptionManual()">+ Добавить</button>
-        <button class="btn2 alt" onclick="loadDemoWheelOptions()">Загрузить пример</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- GENERATE -->
-  <div style="margin:20px 0 10px">
-    <div style="background:var(--gold-light);border:1px solid rgba(212,175,55,0.2);border-radius:14px;padding:14px;margin-bottom:12px;">
-      <div style="font-size:11px;font-weight:900;color:var(--dark);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;">📐 Размер iframe на слайде Genially</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;">
-        <div>
-          <label style="font-size:10px;color:#7a6530;">Ширина</label>
-          <input type="text" id="iframe_w" value="100%" style="padding:8px;font-size:12px;">
-        </div>
-        <div>
-          <label style="font-size:10px;color:#7a6530;">Высота (px)</label>
-          <input type="number" id="iframe_h" value="600" style="padding:8px;font-size:12px;">
-        </div>
-      </div>
-      <div style="font-size:10px;color:#999;line-height:1.5;">Примеры ширины: 100%, 800px, 70%. После вставки в Genially растяните iframe — игра масштабируется автоматически.</div>
-    </div>
-    <button class="btn" id="btnGenerate">⚡ СОЗДАТЬ ИГРУ</button>
-  </div>
-
-  <!-- OUTPUT -->
-  <div class="card">
-    <h2>✅ <span id="tOutput">Код для вставки</span></h2>
-    <div class="help" id="hOutput">Скопируйте этот код и вставьте в Genially (Others → Insert external content).</div>
-    <div id="output" class="out" style="margin-top:8px"></div>
-  </div>
-
-  <!-- PREVIEW -->
-  <div class="card">
-    <h2>👀 <span id="tPreview">Предпросмотр</span></h2>
-    <div class="previewBox">
-      <iframe id="preview" class="previewFrame" allow="autoplay"></iframe>
-    </div>
-  </div>
-</div>
-
-<div class="footer" style="margin-top:18px;">
-  <span>© ИГРОВОЙ КВАРТАЛ. Все права защищены.</span>
 </div>
 
 <script>
+
 // =========== STATE ===========
 let soundData = { correct: '', wrong: '', tick: '', victory: '' };
 let questions = [];
@@ -1052,7 +646,6 @@ ${transparentCSS}
 .gold-text{font-size:clamp(22px,4vw,60px)!important;}
 .game-btn{font-size:clamp(12px,1.5vw,24px)!important;padding:clamp(10px,1.5vh,16px) clamp(20px,4vw,70px)!important;}
 .word-text{font-size:clamp(11px,1.4vw,20px)!important;}
-.active-word .word-text{font-size:clamp(16px,2.2vw,32px)!important;}
 .prog-slot{width:clamp(20px,3vw,35px)!important;height:clamp(20px,3vw,35px)!important;}
 .static-pointer{width:clamp(50px,7vw,90px)!important;height:clamp(50px,7vw,90px)!important;right:clamp(-35px,-5vw,-55px)!important;margin-top:clamp(-25px,-3vw,-45px)!important;}
 #custom-cursor{position:fixed;width:20px;height:20px;border:2px solid #ffd700;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);box-shadow:0 0 15px #ffd700;}
@@ -1066,10 +659,11 @@ ${transparentCSS}
 .wheel-box{position:relative;width:clamp(280px,40vw,480px);height:clamp(280px,40vw,480px);}
 .static-pointer{position:absolute;width:90px;height:90px;right:-55px;top:50%;margin-top:-45px;transform:rotate(-90deg);filter:drop-shadow(0 0 15px #ffd700);z-index:100;pointer-events:none;display:flex;align-items:center;justify-content:center;font-size:50px;color:#ffd700;animation:pushEffort 1s infinite ease-in-out;}
 @keyframes pushEffort{0%,100%{transform:rotate(-90deg) translateX(0)}50%{transform:rotate(-90deg) translateX(-5px)}}
-.main-wheel{width:100%;height:100%;border-radius:50%;${wheelBorderCSS}${wheelBgCSS}position:relative;transition:transform 0.2s cubic-bezier(0.1,0,0.2,1);box-shadow:0 0 50px rgba(0,0,0,0.5),inset 0 0 40px rgba(0,0,0,0.5);overflow:hidden;z-index:5;}
-.word-item{position:absolute;left:50%;top:50%;width:180px;margin-left:-215px;transform-origin:215px center;display:flex;justify-content:flex-start;align-items:center;z-index:10;}
-.word-text{color:${st.wheelText};font-size:clamp(14px,1.8vw,20px);font-weight:bold;transition:0.3s;white-space:nowrap;padding-left:10px;${shadowCSS}}
-.active-word .word-text{color:${st.wheelActive};font-size:clamp(20px,2.8vw,32px);${activeBackdropCSS}text-shadow:0 0 15px ${st.wheelActive};}
+.main-wwheel-bg{position:absolute;inset:0;border-radius:50%;${wheelBgCSS}overflow:hidden;z-index:1;}
+.main-wheel{width:100%;height:100%;border-radius:50%;${wheelBorderCSS}position:relative;transition:transform 0.2s cubic-bezier(0.1,0,0.2,1);box-shadow:0 0 50px rgba(0,0,0,0.5),inset 0 0 40px rgba(0,0,0,0.5);overflow:visible;z-index:5;}
+.word-item{position:absolute;left:50%;top:50%;width:clamp(80px,16vw,180px);margin-left:calc(-1 * clamp(110px,22vw,220px));transform-origin:clamp(110px,22vw,220px) center;display:flex;justify-content:flex-start;align-items:center;z-index:10;}
+.word-text{color:${st.wheelText};font-size:clamp(12px,1.5vw,20px);font-weight:bold;transition:0.3s;white-space:nowrap;padding-left:10px;${shadowCSS}}
+.active-word .word-text{color:${st.wheelActive};font-size:clamp(16px,2.4vw,32px);${activeBackdropCSS}text-shadow:0 0 15px ${st.wheelActive};}
 .arrow-pulse{animation:arrowPulse 1.5s ease-in-out infinite;}
 @keyframes arrowPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.15)}}
 .game-layout{display:flex;align-items:center;gap:clamp(30px,5vw,80px);z-index:10;margin-top:clamp(20px,4vh,50px);}
@@ -1127,7 +721,7 @@ ${transparentCSS}
     <div class="arrow-box">${arrowHTML}</div>
     <div class="wheel-box">
       ${wheelFrameHTML}
-      <div class="main-wheel" id="wheel-inner"></div>
+      <div class="main-wheel" id="wheel-inner"><div class="wheel-bg"></div></div>
       <div class="static-pointer">${pointerHTML}</div>
     </div>
   </div>
@@ -1384,12 +978,12 @@ function generate(){
   const iH = document.getElementById('iframe_h') ? document.getElementById('iframe_h').value || '600' : '600';
   const iframeCode = '<iframe srcdoc="'+escaped+'" width="'+iW+'" height="'+iH+'" frameborder="0" style="background:transparent;display:block" allow="autoplay"></iframe>';
 
-  document.getElementById('output').textContent = iframeCode;
+  document.getElementById('hidden_output').value = iframeCode;
   document.getElementById('preview').srcdoc = gameHtml;
 }
 
 function copyOut(){
-  const txt=document.getElementById('output').textContent||'';
+  const txt=document.getElementById('hidden_output').value||'';
   navigator.clipboard.writeText(txt).then(function(){
     var btn = document.getElementById('btnCopy');
     var orig = btn.textContent;
@@ -1427,22 +1021,66 @@ function applyLang(lang){
   });
 }
 
-// =========== INIT ===========
-document.getElementById('uiLang').addEventListener('change',()=>applyLang(document.getElementById('uiLang').value));
-document.getElementById('new_wheel_option').addEventListener('keydown',(e)=>{ if(e.key==='Enter') addWheelOption(); });
-document.getElementById('new_wheel_option_manual').addEventListener('keydown',(e)=>{ if(e.key==='Enter') addWheelOptionManual(); });
-
-applyLang('ru');
-loadDemoQuestions();
-renderWheelOptions();
-
-// iframe size fields trigger regenerate
-['iframe_w','iframe_h'].forEach(function(id){
-  var el = document.getElementById(id);
-  if(el) el.addEventListener('input', generate);
+// old init removed
+// =========== TABS ===========
+['texts','images','style','questions','wheel','audio'].forEach(function(name) {
+  document.getElementById('tbtn-'+name).addEventListener('click', function() {
+    document.querySelectorAll('.tab-pane').forEach(function(p){ p.classList.remove('active'); });
+    document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+    document.getElementById('tab-'+name).classList.add('active');
+    document.getElementById('tbtn-'+name).classList.add('active');
+  });
 });
 
+// Preset buttons
+document.querySelectorAll('.preset-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() { selectBtnStyle(this); });
+});
+
+// Wheel mode radio
+document.getElementById('wheel_auto').addEventListener('change', toggleWheelMode);
+document.getElementById('wheel_manual').addEventListener('change', toggleWheelMode);
+
+// Question buttons
+document.getElementById('btn-add-q').addEventListener('click', addQuestion);
+document.getElementById('btn-demo-q').addEventListener('click', loadDemoQuestions);
+document.getElementById('btn-batch-add').addEventListener('click', parseBatch);
+document.getElementById('btn-batch-replace').addEventListener('click', parseBatchReplace);
+
+// Wheel buttons
+document.getElementById('btn-add-extra').addEventListener('click', addWheelOption);
+document.getElementById('btn-add-manual').addEventListener('click', addWheelOptionManual);
+document.getElementById('btn-demo-w').addEventListener('click', loadDemoWheelOptions);
+document.getElementById('new_wheel_option').addEventListener('keydown', function(e){ if(e.key==='Enter') addWheelOption(); });
+document.getElementById('new_wheel_option_manual').addEventListener('keydown', function(e){ if(e.key==='Enter') addWheelOptionManual(); });
+
+// Sound play buttons
+document.getElementById('play-correct').addEventListener('click', function(){ playDefaultSound('correct'); });
+document.getElementById('play-wrong').addEventListener('click', function(){ playDefaultSound('wrong'); });
+document.getElementById('play-tick').addEventListener('click', function(){ playDefaultSound('tick'); });
+document.getElementById('play-victory').addEventListener('click', function(){ playDefaultSound('victory'); });
+
+// Sound file uploads
+document.getElementById('file_snd_correct').addEventListener('change', function(){ handleSoundUpload(this,'correct'); });
+document.getElementById('file_snd_wrong').addEventListener('change', function(){ handleSoundUpload(this,'wrong'); });
+document.getElementById('file_snd_tick').addEventListener('change', function(){ handleSoundUpload(this,'tick'); });
+document.getElementById('file_snd_victory').addEventListener('change', function(){ handleSoundUpload(this,'victory'); });
+
+// Main buttons
+document.getElementById('btnGenerate').addEventListener('click', generate);
+document.getElementById('btnCopy').addEventListener('click', copyOut);
+document.getElementById('btnDownload').addEventListener('click', downloadHtml);
+
+// Auto-regenerate on input change
+document.querySelectorAll('#tab-texts input, #tab-images input, #tab-style input, #tab-style select, #tab-audio input').forEach(function(el) {
+  el.addEventListener('input', generate);
+  el.addEventListener('change', generate);
+});
+
+loadDemoQuestions();
+renderWheelOptions();
 generate();
+
 </script>
 </body>
 </html>
