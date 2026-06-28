@@ -220,6 +220,20 @@
           <div><label>Толщина рамки</label><input type="number" id="sld_card_border_width" value="3" min="0" max="8"></div>
           <div><label>Прозрачность рамки</label><input type="number" id="sld_card_border_opacity" value="1" min="0" max="1" step="0.05"></div>
         </div>
+        <h3>Размер элементов</h3>
+        <div class="help" style="margin-bottom:6px;">Ширина и высота в % от экрана. 0 = авто.</div>
+        <div class="field-group row2">
+          <div><label>Карточка W (vw)</label><input type="number" id="sz_card_w" value="0" step="1" min="0" max="80" placeholder="авто"></div>
+          <div><label>Карточка H (vh)</label><input type="number" id="sz_card_h" value="0" step="1" min="0" max="50" placeholder="авто"></div>
+        </div>
+        <div class="field-group row2">
+          <div><label>Колесо W/H (vw)</label><input type="number" id="sz_wheel" value="0" step="1" min="0" max="80" placeholder="авто"></div>
+          <div><label>Кнопка W (vw)</label><input type="number" id="sz_btn_w" value="0" step="1" min="0" max="80" placeholder="авто"></div>
+        </div>
+        <div class="field-group row2">
+          <div><label>Кнопка H (vh)</label><input type="number" id="sz_btn_h" value="0" step="1" min="0" max="30" placeholder="авто"></div>
+          <div><label>Размер текста кнопки (px)</label><input type="number" id="sz_btn_font" value="0" step="1" min="0" max="60" placeholder="авто"></div>
+        </div>
         <h3>Позиция элементов (смещение от центра)</h3>
         <div class="help" style="margin-bottom:6px;">Сдвиньте карточку, колесо и кнопку на нужную позицию.</div>
         <div class="field-group row2">
@@ -603,7 +617,13 @@ function safeJson(obj){
     .replace(/</g,'\\u003c')
     .replace(/>/g,'\\u003e')
     .replace(/&/g,'\\u0026')
-    .replace(/\\"/g,'\\u0022');  // " -> \u0022 so escapeForSrcdoc can't break it
+    .replace(/\\"/g,'\\u0022');
+}
+function safeUrl(url){
+  // For URLs: only escape chars that break HTML attributes, preserve & in query strings
+  if(!url) return '""';
+  // Replace " with \u0022 so escapeForSrcdoc doesn't break it
+  return '"' + url.replace(/\\/g,'\\\\').replace(/"/g,'\\u0022') + '"';
 }
 
 // =========== COLOR & STYLE HELPERS ===========
@@ -659,6 +679,12 @@ function getStyleCfg(){
     cardBorderWidth:parseInt(document.getElementById('sld_card_border_width').value),
     cardBorderOpacity:parseFloat(document.getElementById('sld_card_border_opacity').value),
     cardBgSize:(document.getElementById('card_bg_size')||{value:'cover'}).value||'cover',
+    szCardW:parseFloat((document.getElementById('sz_card_w')||{value:'0'}).value)||0,
+    szCardH:parseFloat((document.getElementById('sz_card_h')||{value:'0'}).value)||0,
+    szWheel:parseFloat((document.getElementById('sz_wheel')||{value:'0'}).value)||0,
+    szBtnW:parseFloat((document.getElementById('sz_btn_w')||{value:'0'}).value)||0,
+    szBtnH:parseFloat((document.getElementById('sz_btn_h')||{value:'0'}).value)||0,
+    szBtnFont:parseFloat((document.getElementById('sz_btn_font')||{value:'0'}).value)||0,
     posCardX:parseFloat((document.getElementById('pos_card_x')||{value:'0'}).value)||0,
     posCardY:parseFloat((document.getElementById('pos_card_y')||{value:'0'}).value)||0,
     posWheelX:parseFloat((document.getElementById('pos_wheel_x')||{value:'0'}).value)||0,
@@ -712,17 +738,17 @@ function buildGameHtml(cfg){
     victory: getSound('victory')
   });
   const particleURL2 = cfg.urls.particle||'';
-  const particleJson = safeJson(particleURL2);
-  const wheelBgJson = safeJson(cfg.urls.wheelBg||'');
-  const cardBgJson      = safeJson(cfg.urls.cardBg||'');
-  const wheelFrameJson  = safeJson(cfg.urls.wheelFrame||'');
-  const arrowJson       = safeJson(cfg.urls.arrow||'');
-  const pointerJson     = safeJson(cfg.urls.pointer||'');
-  const bgJson          = safeJson(cfg.urls.bg||'');
-  const startBgJson     = safeJson(cfg.urls.startBg||'');
-  const victoryBgJson   = safeJson(cfg.urls.victoryBg||'');
-  const progressBgJson  = safeJson(cfg.urls.progress||'');
-  const btnBgJson       = safeJson(cfg.urls.btnBg||'');
+  const particleJson = safeUrl(particleURL2||'');
+  const wheelBgJson = safeUrl(cfg.urls.wheelBg||'');
+  const cardBgJson      = safeUrl(cfg.urls.cardBg||'');
+  const wheelFrameJson  = safeUrl(cfg.urls.wheelFrame||'');
+  const arrowJson       = safeUrl(cfg.urls.arrow||'');
+  const pointerJson     = safeUrl(cfg.urls.pointer||'');
+  const bgJson          = safeUrl(cfg.urls.bg||'');
+  const startBgJson     = safeUrl(cfg.urls.startBg||'');
+  const victoryBgJson   = safeUrl(cfg.urls.victoryBg||'');
+  const progressBgJson  = safeUrl(cfg.urls.progress||'');
+  const btnBgJson       = safeUrl(cfg.urls.btnBg||'');
   const cardBgSizeJson = safeJson(cfg.style.cardBgSize||'cover');
   const cardBgPosJson  = safeJson((cfg.style.cardBgPosX||'50')+'% '+(cfg.style.cardBgPosY||'50')+'%');
   const blankCharJson = safeJson(cfg.blankChar);
@@ -868,6 +894,12 @@ ${transparentCSS}
   var PROGRESS_URL   = ${progressBgJson};
   var BTN_BG_URL     = ${btnBgJson};
   var BLANK_CHAR   = ${blankCharJson};
+  var SZ_CARD_W    = ${safeJson(cfg.style.szCardW||0)};
+  var SZ_CARD_H    = ${safeJson(cfg.style.szCardH||0)};
+  var SZ_WHEEL     = ${safeJson(cfg.style.szWheel||0)};
+  var SZ_BTN_W     = ${safeJson(cfg.style.szBtnW||0)};
+  var SZ_BTN_H     = ${safeJson(cfg.style.szBtnH||0)};
+  var SZ_BTN_FONT  = ${safeJson(cfg.style.szBtnFont||0)};
   var POS_CARD_X   = ${safeJson(cfg.style.posCardX||0)};
   var POS_CARD_Y   = ${safeJson(cfg.style.posCardY||0)};
   var POS_WHEEL_X  = ${safeJson(cfg.style.posWheelX||0)};
@@ -1103,13 +1135,34 @@ if(BTN_BG_URL&&BTN_BG_URL.length>4){
     loadBgWithFallback(b, BTN_BG_URL, 'cover', 'center');
   });
 }
-// Apply element position offsets
+// Apply element size and position
 (function(){
   var deck = document.getElementById('deck');
   var wb   = document.querySelector('.wheel-box');
   var ubtn = document.getElementById('unlock-btn');
-  if(deck && POS_CARD_X !== 0 || POS_CARD_Y !== 0) {
-    if(deck) deck.style.transform = 'translate('+POS_CARD_X+'vw,'+POS_CARD_Y+'vh)';
+  var ustart = document.getElementById('start-btn');
+  // Sizes
+  if(deck) {
+    if(SZ_CARD_W>0) deck.style.width = SZ_CARD_W+'vw';
+    if(SZ_CARD_H>0) deck.style.height = SZ_CARD_H+'vh';
+  }
+  if(wb && SZ_WHEEL>0) {
+    wb.style.width = SZ_WHEEL+'vw';
+    wb.style.height = SZ_WHEEL+'vw';
+  }
+  if(ubtn) {
+    if(SZ_BTN_W>0) ubtn.style.width = SZ_BTN_W+'vw';
+    if(SZ_BTN_H>0) ubtn.style.height = SZ_BTN_H+'vh';
+    if(SZ_BTN_FONT>0) ubtn.style.fontSize = SZ_BTN_FONT+'px';
+  }
+  if(ustart) {
+    if(SZ_BTN_W>0) ustart.style.width = SZ_BTN_W+'vw';
+    if(SZ_BTN_H>0) ustart.style.height = SZ_BTN_H+'vh';
+    if(SZ_BTN_FONT>0) ustart.style.fontSize = SZ_BTN_FONT+'px';
+  }
+  // Positions
+  if(deck && (POS_CARD_X !== 0 || POS_CARD_Y !== 0)) {
+    deck.style.transform = 'translate('+POS_CARD_X+'vw,'+POS_CARD_Y+'vh)';
   }
   if(wb && (POS_WHEEL_X !== 0 || POS_WHEEL_Y !== 0)) {
     wb.style.transform = 'translate('+POS_WHEEL_X+'vw,'+POS_WHEEL_Y+'vh)';
@@ -1304,6 +1357,7 @@ document.getElementById('btnReset').addEventListener('click', function() {
     sld_card_border_width:'3', sld_card_border_opacity:'1',
     sld_active_bg_opacity:'0.6', sld_active_bg_radius:'8',
     card_bg_size:'cover', card_bg_pos_x:'50', card_bg_pos_y:'50',
+    sz_card_w:'0',sz_card_h:'0',sz_wheel:'0',sz_btn_w:'0',sz_btn_h:'0',sz_btn_font:'0',
     pos_card_x:'0', pos_card_y:'0', pos_wheel_x:'0', pos_wheel_y:'0', pos_btn_x:'0', pos_btn_y:'0'
   };
   Object.entries(defaults).forEach(function(kv) {
@@ -1371,6 +1425,7 @@ var SAVE_FIELDS = [
   'sld_shadow_size','sld_shadow_blur','sld_card_border_width','sld_card_border_opacity',
   'sld_active_bg_opacity','sld_active_bg_radius',
   'card_bg_size','card_bg_pos_x','card_bg_pos_y',
+  'sz_card_w','sz_card_h','sz_wheel','sz_btn_w','sz_btn_h','sz_btn_font',
   'pos_card_x','pos_card_y','pos_wheel_x','pos_wheel_y','pos_btn_x','pos_btn_y'
 ];
 var SAVE_CHECKS = ['transparentBg','chk_arrow_pulse'];
