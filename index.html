@@ -474,11 +474,7 @@ function loadBgWithFallback(el, url, size, pos) {
 }
 function getUrl(id){
   const el = document.getElementById(id);
-  if (!el) return '';
-  var url = el.value.trim();
-  // Use base64 from cache if available (fetched for CSP-safe embedding)
-  if (url && imgCache[url]) return imgCache[url];
-  return url;
+  return el ? el.value.trim() : '';
 }
 
 // =========== SOUND UPLOAD ===========
@@ -618,40 +614,7 @@ function safeUrl(url){
   return "'" + escaped + "'";
 }
 
-// Cache for base64 images fetched from editor side
-var imgCache = {};
 
-// Fetch image via editor (no CSP), convert to base64 data URL
-function fetchAsBase64(url, callback) {
-  if (!url || url.length < 5) { callback(url); return; }
-  if (imgCache[url]) { callback(imgCache[url]); return; }
-  // Try fetch with no-cors mode first, then cors
-  fetch(url)
-    .then(function(r){ return r.blob(); })
-    .then(function(blob){
-      var reader = new FileReader();
-      reader.onload = function(e){
-        imgCache[url] = e.target.result;
-        callback(e.target.result);
-      };
-      reader.readAsDataURL(blob);
-    })
-    .catch(function(){
-      // If direct fetch fails, try via proxy
-      var proxyUrl = 'https://images.weserv.nl/?url=' + encodeURIComponent(url) + '&output=webp';
-      fetch(proxyUrl)
-        .then(function(r){ return r.blob(); })
-        .then(function(blob){
-          var reader = new FileReader();
-          reader.onload = function(e){
-            imgCache[url] = e.target.result;
-            callback(e.target.result);
-          };
-          reader.readAsDataURL(blob);
-        })
-        .catch(function(){ callback(url); }); // fallback to original URL
-    });
-}
 
 // =========== COLOR & STYLE HELPERS ===========
 function syncHex(colorInput,hexId){ document.getElementById(hexId).value=colorInput.value; }
@@ -887,26 +850,12 @@ ${transparentCSS}
   // ---- IMAGE LOADING UTILITIES ----
   function loadImgWithFallback(imgEl, url) {
     if(!url||url.length<5) return;
-    var proxied = proxyIfNeeded(url);
-    imgEl.onerror=function(){
-      imgEl.onerror=null;
-      // If proxy also fails, try corsproxy
-      imgEl.src='https://corsproxy.io/?'+encodeURIComponent(url);
-    };
-    imgEl.src=proxied;
-  }
-  function proxyIfNeeded(url) {
-    // img.genially.com may be blocked by CSP in srcdoc - use proxy
-    if (url && url.indexOf('img.genially.com') !== -1) {
-      return 'https://images.weserv.nl/?url=' + encodeURIComponent(url);
-    }
-    return url;
+    imgEl.src=url;
   }
   function loadBgWithFallback(el, url, sz, pos) {
     if(!url||url.length<5) return;
     sz=sz||'cover'; pos=pos||'center';
-    var proxied = proxyIfNeeded(url);
-    el.style.backgroundImage='url('+proxied+')';
+    el.style.backgroundImage='url('+url+')';
     el.style.backgroundSize=sz;
     el.style.backgroundPosition=pos;
     el.style.backgroundRepeat='no-repeat';
@@ -1079,7 +1028,7 @@ ${transparentCSS}
     var gv=document.getElementById('game-view');
     gv.style.display='flex';
     init();
-    setTimeout(initDragResize, 300);
+    setTimeout(function(){ try{ initDragResize(); }catch(e){} }, 300);
   }
 
   // ---- RESET ----
@@ -1329,29 +1278,6 @@ var cursor=document.getElementById('custom-cursor');
 
 // =========== GENERATE ===========
 function generate(){
-  // Pre-fetch images as base64 to avoid CSP issues in srcdoc
-  var urlsToFetch = ['url_wheel_bg','url_card_bg','url_bg','url_start_bg','url_victory_bg','url_btn_bg','url_progress'];
-  var pending = urlsToFetch.filter(function(id){ var el=document.getElementById(id); return el && el.value.trim().length>5; });
-  if (pending.length > 0 && !window._skipFetch) {
-    window._skipFetch = true;
-    var done = 0;
-    pending.forEach(function(id){
-      var url = getUrl(id);
-      fetchAsBase64(url, function(b64){
-        imgCache[url] = b64;
-        done++;
-        if (done >= pending.length) {
-          window._skipFetch = false;
-          generateNow();
-        }
-      });
-    });
-    return;
-  }
-  window._skipFetch = false;
-  generateNow();
-}
-function generateNow(){
   const cfg={
     title: document.getElementById('ui_title').value||'Wheel of Wisdom',
     titleMain: document.getElementById('ui_title').value||'Wheel of Wisdom',
