@@ -316,6 +316,7 @@
       <button class="btn-action btn-gold" id="btnGenerate">⚡ СОЗДАТЬ</button>
       <button class="btn-action btn-copy" id="btnCopy">СКОПИРОВАТЬ</button>
       <button class="btn-action btn-copy" id="btnDownload">↓ HTML</button>
+      <button class="btn-action" id="btnReset" style="background:#5a1a1a;color:#ff8888;flex:0.6;" title="Сбросить все настройки и картинки">🗑</button>
     </div>
     <div class="studio-footer">
       <img src="https://raw.githubusercontent.com/VeRa422/hidden_artifacts/main/logo.png" alt="Logo" class="footer-logo-img" onerror="this.style.display='none'">
@@ -1116,6 +1117,82 @@ document.getElementById('file_snd_victory').addEventListener('change', function(
 document.getElementById('btnGenerate').addEventListener('click', generate);
 document.getElementById('btnCopy').addEventListener('click', copyOut);
 document.getElementById('btnDownload').addEventListener('click', downloadHtml);
+document.getElementById('btnReset').addEventListener('click', function() {
+  if (!confirm('Сбросить все настройки, картинки и задания? Это действие нельзя отменить.')) return;
+  // Clear localStorage
+  try {
+    localStorage.removeItem('wof_editor_v2');
+    localStorage.removeItem('wof_questions_v2');
+    localStorage.removeItem('wof_wheel_extra_v2');
+    localStorage.removeItem('wof_wheel_manual_v2');
+  } catch(e) {}
+  // Reset all text/url fields to defaults
+  var defaults = {
+    ui_title:'Wheel of Wisdom', ui_subtitle:'Колесо мудрости',
+    ui_start:'Start', ui_blank:'?',
+    ui_victory_title:'ALL TASKS COMPLETED!', ui_victory_sub:'YOU ARE A TRUE CHAMPION!',
+    ui_again:'Play Again', ui_unlock:'Check Answer',
+    iframe_w:'100%', iframe_h:'600',
+    url_bg:'', url_start_bg:'', url_victory_bg:'',
+    url_wheel_bg:'', url_wheel_frame:'', url_pointer:'',
+    url_card_bg:'', url_arrow:'', url_progress:'',
+    url_particle:'', url_btn_bg:'',
+    clr_title:'#ffd700', clr_btn_text:'#1a1403',
+    clr_btn_bg1:'#ffd700', clr_btn_bg2:'#b8860b',
+    clr_btn_border:'#5c4306', clr_wheel_text:'#5a4814',
+    clr_wheel_active:'#ffffff', clr_card_text:'#1a1403',
+    clr_shadow:'#000000', clr_card_border:'#ffd700', clr_active_bg:'#000000',
+    sld_btn_radius:'15', sld_title_glow:'30', sld_btn_glow:'0',
+    sld_btn_opacity:'1', sld_shadow_size:'2', sld_shadow_blur:'6',
+    sld_card_border_width:'3', sld_card_border_opacity:'1',
+    sld_active_bg_opacity:'0.6', sld_active_bg_radius:'8',
+    card_bg_size:'cover', card_bg_pos_x:'50', card_bg_pos_y:'50'
+  };
+  Object.entries(defaults).forEach(function(kv) {
+    var el = document.getElementById(kv[0]);
+    if (el) el.value = kv[1];
+  });
+  // Reset checkboxes
+  var cb_transparent = document.getElementById('transparentBg');
+  if (cb_transparent) cb_transparent.checked = false;
+  var cb_arrow = document.getElementById('chk_arrow_pulse');
+  if (cb_arrow) cb_arrow.checked = true;
+  // Reset selects
+  var ft = document.getElementById('sel_font_title');
+  if (ft) ft.value = "'Cinzel Decorative',cursive";
+  var fb = document.getElementById('sel_font_body');
+  if (fb) fb.value = "'Philosopher',sans-serif";
+  // Clear image previews
+  document.querySelectorAll('.url-preview').forEach(function(img) {
+    img.src = ''; img.style.display = 'none';
+  });
+  // Reset questions and wheel
+  questions = [];
+  wheelExtraOptions = [];
+  wheelManualOptions = [];
+  soundData = { correct:'', wrong:'', tick:'', victory:'' };
+  // Reset sound status labels
+  ['correct','wrong','tick','victory'].forEach(function(k) {
+    var el = document.getElementById('snd_'+k+'_status');
+    if (el) el.textContent = 'встроенный ✓';
+  });
+  // Reset file inputs
+  document.querySelectorAll('input[type=file]').forEach(function(el) { el.value=''; });
+  // Reset preset button
+  document.querySelectorAll('.preset-btn').forEach(function(b) { b.classList.remove('active'); });
+  var first = document.querySelector('.preset-btn[data-style="gold-classic"]');
+  if (first) first.classList.add('active');
+  // Load demo and regenerate
+  loadDemoQuestions();
+  renderWheelOptions();
+  generate();
+  // Visual feedback
+  var btn = document.getElementById('btnReset');
+  var orig = btn.textContent;
+  btn.textContent = '✓';
+  btn.style.background = '#1a5a1a';
+  setTimeout(function() { btn.textContent = orig; btn.style.background = ''; }, 1500);
+});
 
 // Auto-regenerate on input change
 document.querySelectorAll('#tab-texts input, #tab-images input, #tab-style input, #tab-style select, #tab-audio input').forEach(function(el) {
