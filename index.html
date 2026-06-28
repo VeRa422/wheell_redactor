@@ -220,6 +220,20 @@
           <div><label>Толщина рамки</label><input type="number" id="sld_card_border_width" value="3" min="0" max="8"></div>
           <div><label>Прозрачность рамки</label><input type="number" id="sld_card_border_opacity" value="1" min="0" max="1" step="0.05"></div>
         </div>
+        <h3>Позиция элементов (смещение от центра)</h3>
+        <div class="help" style="margin-bottom:6px;">Сдвиньте карточку, колесо и кнопку на нужную позицию.</div>
+        <div class="field-group row2">
+          <div><label>Карточка X (vw)</label><input type="number" id="pos_card_x" value="0" step="1" min="-50" max="50"></div>
+          <div><label>Карточка Y (vh)</label><input type="number" id="pos_card_y" value="0" step="1" min="-50" max="50"></div>
+        </div>
+        <div class="field-group row2">
+          <div><label>Колесо X (vw)</label><input type="number" id="pos_wheel_x" value="0" step="1" min="-50" max="50"></div>
+          <div><label>Колесо Y (vh)</label><input type="number" id="pos_wheel_y" value="0" step="1" min="-50" max="50"></div>
+        </div>
+        <div class="field-group row2">
+          <div><label>Кнопка X (vw)</label><input type="number" id="pos_btn_x" value="0" step="1" min="-50" max="50"></div>
+          <div><label>Кнопка Y (vh)</label><input type="number" id="pos_btn_y" value="0" step="1" min="-50" max="50"></div>
+        </div>
         <h3>Масштаб фона карточки</h3>
         <div class="field-group row3">
           <div><label>Размер (cover/contain/%)</label><input type="text" id="card_bg_size" value="cover" placeholder="cover"></div>
@@ -409,12 +423,51 @@ function previewUrl(input, previewId) {
 }
 function proxyUrl(url) {
   if (!url || !url.startsWith('http')) return url;
-  // Wrap img.genially.com URLs through a CORS proxy
-  // wsrv.nl is a free image proxy that handles CORS and format conversion
-  if (url.includes('img.genially.com')) {
-    return 'https://wsrv.nl/?url=' + encodeURIComponent(url) + '&output=png';
-  }
+  // For img.genially.com: try to load directly first
+  // The proxy approach doesn't work reliably in all environments
+  // Instead we use the URL directly and handle errors via JS
   return url;
+}
+// Try loading image with fallback proxies
+function loadImgWithFallback(imgEl, url) {
+  if (!url || url.length < 5) return;
+  var proxies = [
+    url, // try direct first
+    'https://images.weserv.nl/?url=' + encodeURIComponent(url) + '&output=png',
+    'https://wsrv.nl/?url=' + encodeURIComponent(url),
+    'https://corsproxy.io/?' + encodeURIComponent(url)
+  ];
+  var idx = 0;
+  function tryNext() {
+    if (idx >= proxies.length) return;
+    imgEl.onerror = function() { idx++; tryNext(); };
+    imgEl.src = proxies[idx];
+  }
+  tryNext();
+}
+function loadBgWithFallback(el, url, size, pos) {
+  if (!url || url.length < 5) return;
+  size = size || 'cover'; pos = pos || 'center';
+  var proxies = [
+    url,
+    'https://images.weserv.nl/?url=' + encodeURIComponent(url) + '&output=png',
+    'https://wsrv.nl/?url=' + encodeURIComponent(url),
+    'https://corsproxy.io/?' + encodeURIComponent(url)
+  ];
+  var idx = 0;
+  var testImg = new Image();
+  function tryNext() {
+    if (idx >= proxies.length) return;
+    testImg.onerror = function() { idx++; tryNext(); };
+    testImg.onload = function() {
+      el.style.backgroundImage = 'url(' + proxies[idx] + ')';
+      el.style.backgroundSize = size;
+      el.style.backgroundPosition = pos;
+      el.style.backgroundRepeat = 'no-repeat';
+    };
+    testImg.src = proxies[idx];
+  }
+  tryNext();
 }
 function getUrl(id){
   const el = document.getElementById(id);
@@ -606,6 +659,12 @@ function getStyleCfg(){
     cardBorderWidth:parseInt(document.getElementById('sld_card_border_width').value),
     cardBorderOpacity:parseFloat(document.getElementById('sld_card_border_opacity').value),
     cardBgSize:(document.getElementById('card_bg_size')||{value:'cover'}).value||'cover',
+    posCardX:parseFloat((document.getElementById('pos_card_x')||{value:'0'}).value)||0,
+    posCardY:parseFloat((document.getElementById('pos_card_y')||{value:'0'}).value)||0,
+    posWheelX:parseFloat((document.getElementById('pos_wheel_x')||{value:'0'}).value)||0,
+    posWheelY:parseFloat((document.getElementById('pos_wheel_y')||{value:'0'}).value)||0,
+    posBtnX:parseFloat((document.getElementById('pos_btn_x')||{value:'0'}).value)||0,
+    posBtnY:parseFloat((document.getElementById('pos_btn_y')||{value:'0'}).value)||0,
     cardBgPosX:(document.getElementById('card_bg_pos_x')||{value:'50'}).value||'50',
     cardBgPosY:(document.getElementById('card_bg_pos_y')||{value:'50'}).value||'50'
   };
@@ -787,7 +846,13 @@ ${transparentCSS}
   var VICTORY_BG_URL = ${victoryBgJson};
   var PROGRESS_URL   = ${progressBgJson};
   var BTN_BG_URL     = ${btnBgJson};
-  var BLANK_CHAR = ${blankCharJson};
+  var BLANK_CHAR   = ${blankCharJson};
+  var POS_CARD_X   = ${safeJson(cfg.style.posCardX||0)};
+  var POS_CARD_Y   = ${safeJson(cfg.style.posCardY||0)};
+  var POS_WHEEL_X  = ${safeJson(cfg.style.posWheelX||0)};
+  var POS_WHEEL_Y  = ${safeJson(cfg.style.posWheelY||0)};
+  var POS_BTN_X    = ${safeJson(cfg.style.posBtnX||0)};
+  var POS_BTN_Y    = ${safeJson(cfg.style.posBtnY||0)};
 
   // ---- STATE ----
   var globalVol = 0.5;
@@ -902,10 +967,8 @@ ${transparentCSS}
       card.id='card-'+i;
       card.innerHTML=grammarData[i].q.replace('___','<span class="blank-space">'+BLANK_CHAR+'</span>');
       if(CARD_BG_URL&&CARD_BG_URL.length>4){
-        card.style.backgroundImage='url('+CARD_BG_URL+')';
-        card.style.backgroundSize=CARD_BG_SIZE;
-        card.style.backgroundPosition=CARD_BG_POS;
         card.style.border='3px solid rgba(0,0,0,0.3)';
+        (function(c){ loadBgWithFallback(c, CARD_BG_URL, CARD_BG_SIZE, CARD_BG_POS); })(card);
       }
       deck.appendChild(card);
     }
@@ -982,38 +1045,32 @@ ${transparentCSS}
 // Apply all URL-based backgrounds via JS (avoids srcdoc escaping issues)
 var wbEl=document.getElementById('wheel-bg-el');
 if(wbEl&&WHEEL_BG_URL&&WHEEL_BG_URL.length>4){
-  wbEl.style.backgroundImage='url('+WHEEL_BG_URL+')';
-  wbEl.style.backgroundSize='cover';
-  wbEl.style.backgroundPosition='center';
+  loadBgWithFallback(wbEl, WHEEL_BG_URL, 'cover', 'center');
 }
-function applyBgUrl(id, url, extra) {
+function applyBgUrl(id, url, sz, pos) {
   if(!url||url.length<5) return;
   var el=document.getElementById(id);
   if(!el) return;
-  el.style.backgroundImage='url('+url+')';
-  el.style.backgroundSize='cover';
-  el.style.backgroundPosition='center';
-  el.style.backgroundRepeat='no-repeat';
-  if(extra) Object.assign(el.style, extra);
+  loadBgWithFallback(el, url, sz||'cover', pos||'center');
 }
 applyBgUrl('game-view', BG_URL);
 // Wheel frame
 if(WHEEL_FRAME_URL&&WHEEL_FRAME_URL.length>4){
   var wfEl=document.getElementById('wheel-frame-el');
   var wfImg=document.getElementById('wheel-frame-img');
-  if(wfEl&&wfImg){ wfImg.src=WHEEL_FRAME_URL; wfEl.style.display='block'; }
+  if(wfEl&&wfImg){ wfEl.style.display='block'; loadImgWithFallback(wfImg, WHEEL_FRAME_URL); }
 }
 // Arrow
 if(ARROW_URL&&ARROW_URL.length>4){
   var aDefault=document.getElementById('arrow-default');
   var aImg=document.getElementById('arrow-img');
-  if(aDefault&&aImg){ aDefault.style.display='none'; aImg.src=ARROW_URL; aImg.style.display='block'; }
+  if(aDefault&&aImg){ aDefault.style.display='none'; aImg.style.display='block'; loadImgWithFallback(aImg, ARROW_URL); }
 }
 // Pointer
 if(POINTER_URL&&POINTER_URL.length>4){
   var pDefault=document.getElementById('pointer-default');
   var pImg=document.getElementById('pointer-img');
-  if(pDefault&&pImg){ pDefault.style.display='none'; pImg.src=POINTER_URL; pImg.style.display='block'; }
+  if(pDefault&&pImg){ pDefault.style.display='none'; pImg.style.display='block'; loadImgWithFallback(pImg, POINTER_URL); }
 }
 applyBgUrl('start-screen', START_BG_URL);
 applyBgUrl('victory-screen', VICTORY_BG_URL);
@@ -1021,11 +1078,25 @@ applyBgUrl('victory-screen', VICTORY_BG_URL);
 // Btn bg - applied to all .game-btn
 if(BTN_BG_URL&&BTN_BG_URL.length>4){
   document.querySelectorAll('.game-btn').forEach(function(b){
-    b.style.backgroundImage='url('+BTN_BG_URL+')';
-    b.style.backgroundSize='cover';
     b.style.border='none';
+    loadBgWithFallback(b, BTN_BG_URL, 'cover', 'center');
   });
 }
+// Apply element position offsets
+(function(){
+  var deck = document.getElementById('deck');
+  var wb   = document.querySelector('.wheel-box');
+  var ubtn = document.getElementById('unlock-btn');
+  if(deck && POS_CARD_X !== 0 || POS_CARD_Y !== 0) {
+    if(deck) deck.style.transform = 'translate('+POS_CARD_X+'vw,'+POS_CARD_Y+'vh)';
+  }
+  if(wb && (POS_WHEEL_X !== 0 || POS_WHEEL_Y !== 0)) {
+    wb.style.transform = 'translate('+POS_WHEEL_X+'vw,'+POS_WHEEL_Y+'vh)';
+  }
+  if(ubtn && (POS_BTN_X !== 0 || POS_BTN_Y !== 0)) {
+    ubtn.style.transform = 'translate('+POS_BTN_X+'vw,'+POS_BTN_Y+'vh)';
+  }
+})();
 var cursor=document.getElementById('custom-cursor');
   document.addEventListener('mousemove',function(e){
     if(cursor){ cursor.style.left=e.clientX+'px'; cursor.style.top=e.clientY+'px'; }
@@ -1211,7 +1282,8 @@ document.getElementById('btnReset').addEventListener('click', function() {
     sld_btn_opacity:'1', sld_shadow_size:'2', sld_shadow_blur:'6',
     sld_card_border_width:'3', sld_card_border_opacity:'1',
     sld_active_bg_opacity:'0.6', sld_active_bg_radius:'8',
-    card_bg_size:'cover', card_bg_pos_x:'50', card_bg_pos_y:'50'
+    card_bg_size:'cover', card_bg_pos_x:'50', card_bg_pos_y:'50',
+    pos_card_x:'0', pos_card_y:'0', pos_wheel_x:'0', pos_wheel_y:'0', pos_btn_x:'0', pos_btn_y:'0'
   };
   Object.entries(defaults).forEach(function(kv) {
     var el = document.getElementById(kv[0]);
@@ -1276,7 +1348,9 @@ var SAVE_FIELDS = [
   'sel_font_title','sel_font_body',
   'sld_btn_radius','sld_title_glow','sld_btn_glow','sld_btn_opacity',
   'sld_shadow_size','sld_shadow_blur','sld_card_border_width','sld_card_border_opacity',
-  'sld_active_bg_opacity','sld_active_bg_radius'
+  'sld_active_bg_opacity','sld_active_bg_radius',
+  'card_bg_size','card_bg_pos_x','card_bg_pos_y',
+  'pos_card_x','pos_card_y','pos_wheel_x','pos_wheel_y','pos_btn_x','pos_btn_y'
 ];
 var SAVE_CHECKS = ['transparentBg','chk_arrow_pulse'];
 
