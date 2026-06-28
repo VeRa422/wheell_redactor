@@ -829,6 +829,27 @@ ${transparentCSS}
 
 <script>
 (function(){
+  // ---- IMAGE LOADING UTILITIES ----
+  function loadImgWithFallback(imgEl, url) {
+    if(!url||url.length<5) return;
+    var proxies=[url,'https://images.weserv.nl/?url='+encodeURIComponent(url)+'&output=png','https://corsproxy.io/?'+encodeURIComponent(url)];
+    var i=0;
+    function tryNext(){if(i>=proxies.length)return;imgEl.onerror=function(){i++;tryNext();};imgEl.src=proxies[i];}
+    tryNext();
+  }
+  function loadBgWithFallback(el, url, sz, pos) {
+    if(!url||url.length<5) return;
+    sz=sz||'cover'; pos=pos||'center';
+    var proxies=[url,'https://images.weserv.nl/?url='+encodeURIComponent(url)+'&output=png','https://corsproxy.io/?'+encodeURIComponent(url)];
+    var i=0, img=new Image();
+    function tryNext(){
+      if(i>=proxies.length) return;
+      img.onerror=function(){i++;tryNext();};
+      img.onload=function(){el.style.backgroundImage='url('+proxies[i]+')';el.style.backgroundSize=sz;el.style.backgroundPosition=pos;el.style.backgroundRepeat='no-repeat';};
+      img.src=proxies[i];
+    }
+    tryNext();
+  }
   // ---- DATA ----
   var QUESTIONS = ${questionsJson};
   var OPTIONS_ORIG = ${optionsJson};
