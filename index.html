@@ -206,6 +206,10 @@
         <h3>Параметры</h3>
         <div class="field-group row3">
           <div><label>Скругление кнопок</label><input type="number" id="sld_btn_radius" value="15" min="0" max="50"></div>
+        </div>
+        <div class="field-group row3">
+          <input type="hidden" id="sld_btn_pad_v" value="16">
+          <input type="hidden" id="sld_btn_pad_h" value="70">
           <div><label>Свечение заголовка</label><input type="number" id="sld_title_glow" value="30" min="0" max="50"></div>
           <div><label>Свечение кнопок</label><input type="number" id="sld_btn_glow" value="0" min="0" max="40"></div>
         </div>
@@ -220,35 +224,20 @@
           <div><label>Толщина рамки</label><input type="number" id="sld_card_border_width" value="3" min="0" max="8"></div>
           <div><label>Прозрачность рамки</label><input type="number" id="sld_card_border_opacity" value="1" min="0" max="1" step="0.05"></div>
         </div>
-        <h3>Размер элементов</h3>
-        <div class="help" style="margin-bottom:6px;">Ширина и высота в % от экрана. 0 = авто.</div>
-        <div class="field-group row2">
-          <div><label>Карточка W (vw)</label><input type="number" id="sz_card_w" value="0" step="1" min="0" max="80" placeholder="авто"></div>
-          <div><label>Карточка H (vh)</label><input type="number" id="sz_card_h" value="0" step="1" min="0" max="50" placeholder="авто"></div>
-        </div>
-        <div class="field-group row2">
-          <div><label>Колесо W/H (vw)</label><input type="number" id="sz_wheel" value="0" step="1" min="0" max="80" placeholder="авто"></div>
-          <div><label>Кнопка W (vw)</label><input type="number" id="sz_btn_w" value="0" step="1" min="0" max="80" placeholder="авто"></div>
-        </div>
-        <div class="field-group row2">
-          <div><label>Кнопка H (vh)</label><input type="number" id="sz_btn_h" value="0" step="1" min="0" max="30" placeholder="авто"></div>
-          <div><label>Размер текста кнопки (px)</label><input type="number" id="sz_btn_font" value="0" step="1" min="0" max="60" placeholder="авто"></div>
-        </div>
-        <h3>Позиция элементов (смещение от центра)</h3>
-        <div class="help" style="margin-bottom:6px;">Сдвиньте карточку, колесо и кнопку на нужную позицию.</div>
-        <div class="field-group row2">
-          <div><label>Карточка X (vw)</label><input type="number" id="pos_card_x" value="0" step="1" min="-50" max="50"></div>
-          <div><label>Карточка Y (vh)</label><input type="number" id="pos_card_y" value="0" step="1" min="-50" max="50"></div>
-        </div>
-        <div class="field-group row2">
-          <div><label>Колесо X (vw)</label><input type="number" id="pos_wheel_x" value="0" step="1" min="-50" max="50"></div>
-          <div><label>Колесо Y (vh)</label><input type="number" id="pos_wheel_y" value="0" step="1" min="-50" max="50"></div>
-        </div>
-        <div class="field-group row2">
-          <div><label>Кнопка X (vw)</label><input type="number" id="pos_btn_x" value="0" step="1" min="-50" max="50"></div>
-          <div><label>Кнопка Y (vh)</label><input type="number" id="pos_btn_y" value="0" step="1" min="-50" max="50"></div>
-        </div>
         <h3>Масштаб фона карточки</h3>
+<!-- Hidden inputs for drag-resize state -->
+<input type="hidden" id="sz_card_w" value="0">
+<input type="hidden" id="sz_card_h" value="0">
+<input type="hidden" id="sz_wheel" value="0">
+<input type="hidden" id="sz_btn_w" value="0">
+<input type="hidden" id="sz_btn_h" value="0">
+<input type="hidden" id="sz_btn_font" value="0">
+<input type="hidden" id="pos_card_x" value="0">
+<input type="hidden" id="pos_card_y" value="0">
+<input type="hidden" id="pos_wheel_x" value="0">
+<input type="hidden" id="pos_wheel_y" value="0">
+<input type="hidden" id="pos_btn_x" value="0">
+<input type="hidden" id="pos_btn_y" value="0">
         <div class="field-group row3">
           <div><label>Размер (cover/contain/%)</label><input type="text" id="card_bg_size" value="cover" placeholder="cover"></div>
           <div><label>Позиция X (%)</label><input type="number" id="card_bg_pos_x" value="50" min="0" max="100"></div>
@@ -356,8 +345,13 @@
 
   <!-- RIGHT PREVIEW -->
   <div class="preview-side">
-    <div class="preview-frame-container">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;padding:0 4px;">
+      <span style="font-size:10px;color:#888;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;">👆 Тяните элементы мышкой прямо в окне предпросмотра</span>
+      <button id="btn-reset-layout" style="background:#333;border:none;color:#aaa;padding:4px 10px;border-radius:6px;font-size:10px;cursor:pointer;">↺ Сбросить позиции</button>
+    </div>
+    <div class="preview-frame-container" style="position:relative;">
       <iframe id="preview" allow="autoplay"></iframe>
+      <div id="drag-overlay" style="position:absolute;inset:0;pointer-events:none;z-index:100;"></div>
     </div>
   </div>
 </div>
@@ -665,6 +659,8 @@ function getStyleCfg(){
     wheelActive:document.getElementById('clr_wheel_active').value,
     cardText:document.getElementById('clr_card_text').value,
     btnOpacity:parseFloat(document.getElementById('sld_btn_opacity').value),
+    btnPadV:parseInt((document.getElementById('sld_btn_pad_v')||{value:'16'}).value)||16,
+    btnPadH:parseInt((document.getElementById('sld_btn_pad_h')||{value:'70'}).value)||70,
     btnGlow:parseInt(document.getElementById('sld_btn_glow').value),
     btnRadius:parseInt(document.getElementById('sld_btn_radius').value),
     titleGlow:parseInt(document.getElementById('sld_title_glow').value),
@@ -779,7 +775,7 @@ ${transparentCSS}
 #victory-screen{background:rgba(0,0,0,0.95);display:none;}
 .tomb{position:relative;width:100vw;height:100vh;overflow:visible;background-color:rgba(0,0,0,0.95);background-image:radial-gradient(circle,rgba(42,31,5,0.6)0%,rgba(0,0,0,0.95)100%);background-size:cover;background-position:center;display:none;flex-direction:column;justify-content:center;align-items:center;}
 .gold-text{font-family:${st.fontTitle};color:${st.titleColor};font-size:clamp(28px,5vw,60px);text-align:center;${titleShadowCSS}margin-bottom:40px;}
-.game-btn{padding:16px 70px;background-color:${st.btnBg1};background-image:linear-gradient(${st.btnBg1},${st.btnBg2});border:3px solid ${st.btnBorder};opacity:${st.btnOpacity};background-size:cover;background-position:center;background-repeat:no-repeat;border-radius:${st.btnRadius}px;font-family:${st.fontTitle};font-size:clamp(14px,2vw,24px);color:${st.btnText};${shadowCSS}cursor:pointer;transition:0.2s;outline:none;}
+.game-btn{padding:${st.btnPadV}px ${st.btnPadH}px;background-color:${st.btnBg1};background-image:linear-gradient(${st.btnBg1},${st.btnBg2});border:3px solid ${st.btnBorder};opacity:${st.btnOpacity};background-size:cover;background-position:center;background-repeat:no-repeat;border-radius:${st.btnRadius}px;font-family:${st.fontTitle};font-size:clamp(14px,2vw,24px);color:${st.btnText};${shadowCSS}cursor:pointer;transition:0.2s;outline:none;overflow:visible;box-sizing:content-box;display:inline-flex;align-items:center;justify-content:center;}
 .game-btn:active{transform:translateY(5px);${btnShadowActive}}
 .wheel-box{position:relative;width:clamp(280px,40vw,480px);height:clamp(280px,40vw,480px);overflow:visible;}
 .static-pointer{position:absolute;width:90px;height:90px;right:-55px;top:50%;margin-top:-45px;transform:rotate(-90deg);filter:drop-shadow(0 0 15px #ffd700);z-index:100;pointer-events:none;display:flex;align-items:center;justify-content:center;font-size:50px;color:#ffd700;animation:pushEffort 1s infinite ease-in-out;}
@@ -850,7 +846,7 @@ ${transparentCSS}
       <div class="static-pointer"><span id="pointer-default">▶</span><img id="pointer-img" style="display:none;width:100%;height:100%;object-fit:contain;"></div>
     </div>
   </div>
-  <button class="game-btn" id="unlock-btn" style="margin-top:clamp(20px,4vh,50px);max-width:clamp(200px,40vw,500px);width:100%;box-sizing:border-box;">${escHtml(cfg.unlockBtn)}</button>
+  <button class="game-btn" id="unlock-btn" style="margin-top:clamp(20px,4vh,50px);">${escHtml(cfg.unlockBtn)}</button>
 </div>
 
 <script>
@@ -1352,7 +1348,7 @@ document.getElementById('btnReset').addEventListener('click', function() {
     clr_btn_border:'#5c4306', clr_wheel_text:'#5a4814',
     clr_wheel_active:'#ffffff', clr_card_text:'#1a1403',
     clr_shadow:'#000000', clr_card_border:'#ffd700', clr_active_bg:'#000000',
-    sld_btn_radius:'15', sld_title_glow:'30', sld_btn_glow:'0',
+    sld_btn_radius:'15', sld_btn_pad_v:'16', sld_btn_pad_h:'70', sld_title_glow:'30', sld_btn_glow:'0',
     sld_btn_opacity:'1', sld_shadow_size:'2', sld_shadow_blur:'6',
     sld_card_border_width:'3', sld_card_border_opacity:'1',
     sld_active_bg_opacity:'0.6', sld_active_bg_radius:'8',
@@ -1421,7 +1417,7 @@ var SAVE_FIELDS = [
   'clr_title','clr_btn_text','clr_btn_bg1','clr_btn_bg2','clr_btn_border',
   'clr_wheel_text','clr_wheel_active','clr_card_text','clr_shadow','clr_card_border','clr_active_bg',
   'sel_font_title','sel_font_body',
-  'sld_btn_radius','sld_title_glow','sld_btn_glow','sld_btn_opacity',
+  'sld_btn_radius','sld_title_glow','sld_btn_glow','sld_btn_opacity','sld_btn_pad_v','sld_btn_pad_h',
   'sld_shadow_size','sld_shadow_blur','sld_card_border_width','sld_card_border_opacity',
   'sld_active_bg_opacity','sld_active_bg_radius',
   'card_bg_size','card_bg_pos_x','card_bg_pos_y',
@@ -1490,7 +1486,275 @@ document.querySelectorAll('input,select,textarea').forEach(function(el) {
 
 // Restore on load
 var restored = restoreFields();
-if(!restored) loadDemoQuestions();
+if(!restored) 
+// =========== DRAG-RESIZE OVERLAY ===========
+var dragState = {
+  elements: {},  // { id: {x,y,w,h} } in px relative to preview container
+  active: null,
+  mode: null,    // 'move' or 'resize'
+  startX: 0, startY: 0,
+  startEl: null
+};
+
+var DRAG_ELEMENTS = [
+  { id: 'card',    label: '📋 Карточка',  color: 'rgba(255,200,0,0.7)' },
+  { id: 'wheel',   label: '🎡 Колесо',    color: 'rgba(0,200,255,0.7)' },
+  { id: 'btn',     label: '✅ Кнопка',    color: 'rgba(0,255,150,0.7)' },
+  { id: 'startbtn',label: '▶ Старт',     color: 'rgba(255,100,100,0.7)' }
+];
+
+function initDragOverlay() {
+  var overlay = document.getElementById('drag-overlay');
+  if (!overlay) return;
+  overlay.innerHTML = '';
+  overlay.style.pointerEvents = 'auto';
+
+  var previewFrame = document.getElementById('preview');
+  var container = overlay.parentElement;
+
+  // Create draggable boxes for each element
+  DRAG_ELEMENTS.forEach(function(el) {
+    var box = document.createElement('div');
+    box.id = 'dbox-' + el.id;
+    box.style.cssText = [
+      'position:absolute',
+      'border:2px dashed ' + el.color,
+      'background:rgba(0,0,0,0.01)',
+      'cursor:move',
+      'box-sizing:border-box',
+      'min-width:40px',
+      'min-height:20px',
+      'display:none'
+    ].join(';');
+
+    // Label
+    var lbl = document.createElement('div');
+    lbl.textContent = el.label;
+    lbl.style.cssText = 'position:absolute;top:-18px;left:0;background:' + el.color + ';color:#000;font-size:9px;font-weight:bold;padding:1px 5px;border-radius:3px;white-space:nowrap;pointer-events:none;';
+    box.appendChild(lbl);
+
+    // Resize handle (bottom-right corner)
+    var handle = document.createElement('div');
+    handle.style.cssText = 'position:absolute;bottom:-5px;right:-5px;width:14px;height:14px;background:' + el.color + ';border-radius:3px;cursor:se-resize;';
+    handle.setAttribute('data-resize', el.id);
+    box.appendChild(handle);
+
+    // Drag events
+    box.addEventListener('mousedown', function(e) {
+      if (e.target.hasAttribute('data-resize')) return;
+      e.preventDefault();
+      dragState.active = el.id;
+      dragState.mode = 'move';
+      dragState.startX = e.clientX;
+      dragState.startY = e.clientY;
+      var rect = box.getBoundingClientRect();
+      var cRect = container.getBoundingClientRect();
+      dragState.startEl = {
+        x: rect.left - cRect.left,
+        y: rect.top - cRect.top,
+        w: rect.width,
+        h: rect.height
+      };
+    });
+
+    handle.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dragState.active = el.id;
+      dragState.mode = 'resize';
+      dragState.startX = e.clientX;
+      dragState.startY = e.clientY;
+      var rect = box.getBoundingClientRect();
+      var cRect = container.getBoundingClientRect();
+      dragState.startEl = {
+        x: rect.left - cRect.left,
+        y: rect.top - cRect.top,
+        w: rect.width,
+        h: rect.height
+      };
+    });
+
+    overlay.appendChild(box);
+    // Initialize with stored state or auto-detect
+    if (!dragState.elements[el.id]) {
+      dragState.elements[el.id] = null; // will be detected from iframe
+    }
+  });
+
+  document.addEventListener('mousemove', onDragMove);
+  document.addEventListener('mouseup', onDragEnd);
+}
+
+function onDragMove(e) {
+  if (!dragState.active) return;
+  var el = dragState.active;
+  var box = document.getElementById('dbox-' + el);
+  if (!box) return;
+  var container = document.getElementById('drag-overlay').parentElement;
+  var cRect = container.getBoundingClientRect();
+  var dx = e.clientX - dragState.startX;
+  var dy = e.clientY - dragState.startY;
+  var s = dragState.startEl;
+
+  if (dragState.mode === 'move') {
+    var nx = Math.max(0, Math.min(cRect.width - s.w, s.x + dx));
+    var ny = Math.max(0, Math.min(cRect.height - s.h, s.y + dy));
+    box.style.left = nx + 'px';
+    box.style.top  = ny + 'px';
+    dragState.elements[el] = { x: nx, y: ny, w: s.w, h: s.h };
+  } else {
+    var nw = Math.max(40, s.w + dx);
+    var nh = Math.max(20, s.h + dy);
+    box.style.width  = nw + 'px';
+    box.style.height = nh + 'px';
+    dragState.elements[el] = { x: s.x, y: s.y, w: nw, h: nh };
+  }
+}
+
+function onDragEnd() {
+  if (!dragState.active) return;
+  dragState.active = null;
+  dragState.mode = null;
+  // Apply changes to the game via postMessage or regenerate
+  applyDragState();
+  saveDragState();
+}
+
+function applyDragState() {
+  // Convert pixel positions to vw/vh and update hidden inputs, then regenerate
+  var preview = document.getElementById('preview');
+  var container = document.getElementById('drag-overlay').parentElement;
+  var cW = container.clientWidth;
+  var cH = container.clientHeight;
+
+  DRAG_ELEMENTS.forEach(function(el) {
+    var state = dragState.elements[el.id];
+    if (!state) return;
+    // Center of the element in % of container
+    var cx = (state.x + state.w/2) / cW * 100; // % from left
+    var cy = (state.y + state.h/2) / cH * 100; // % from top
+    // Offset from center (50%, 50%)
+    var ox = cx - 50;
+    var oy = cy - 50;
+    var sw = state.w / cW * 100;
+    var sh = state.h / cH * 100;
+
+    if (el.id === 'card') {
+      setHidden('pos_card_x', ox.toFixed(1));
+      setHidden('pos_card_y', oy.toFixed(1));
+      setHidden('sz_card_w', sw.toFixed(1));
+      setHidden('sz_card_h', sh.toFixed(1));
+    } else if (el.id === 'wheel') {
+      setHidden('pos_wheel_x', ox.toFixed(1));
+      setHidden('pos_wheel_y', oy.toFixed(1));
+      var sz = Math.max(sw, sh);
+      setHidden('sz_wheel', sz.toFixed(1));
+    } else if (el.id === 'btn' || el.id === 'startbtn') {
+      setHidden('pos_btn_x', ox.toFixed(1));
+      setHidden('pos_btn_y', oy.toFixed(1));
+      setHidden('sz_btn_w', sw.toFixed(1));
+      setHidden('sz_btn_h', sh.toFixed(1));
+    }
+  });
+  generate();
+}
+
+function setHidden(id, val) {
+  var el = document.getElementById(id);
+  if (el) el.value = val;
+}
+
+function saveDragState() {
+  try { localStorage.setItem('wof_drag_v1', JSON.stringify(dragState.elements)); } catch(e) {}
+}
+
+function restoreDragState() {
+  try {
+    var raw = localStorage.getItem('wof_drag_v1');
+    if (!raw) return;
+    var els = JSON.parse(raw);
+    Object.assign(dragState.elements, els);
+    DRAG_ELEMENTS.forEach(function(el) {
+      if (dragState.elements[el.id]) showDragBox(el.id, dragState.elements[el.id]);
+    });
+  } catch(e) {}
+}
+
+function showDragBox(elId, state) {
+  var box = document.getElementById('dbox-' + elId);
+  if (!box || !state) return;
+  box.style.display = 'block';
+  box.style.left   = state.x + 'px';
+  box.style.top    = state.y + 'px';
+  box.style.width  = state.w + 'px';
+  box.style.height = state.h + 'px';
+}
+
+// Auto-detect element positions from iframe after generate
+function detectElementPositions() {
+  var preview = document.getElementById('preview');
+  var overlay = document.getElementById('drag-overlay');
+  if (!preview || !overlay) return;
+  var container = overlay.parentElement;
+  var cRect = container.getBoundingClientRect();
+
+  // Try to read positions from iframe contentDocument
+  try {
+    var doc = preview.contentDocument || preview.contentWindow.document;
+    var elMap = {
+      card:     doc.getElementById('deck'),
+      wheel:    doc.querySelector('.wheel-box'),
+      btn:      doc.getElementById('unlock-btn'),
+      startbtn: doc.getElementById('start-btn')
+    };
+
+    Object.keys(elMap).forEach(function(key) {
+      var domEl = elMap[key];
+      if (!domEl) return;
+      var r = domEl.getBoundingClientRect();
+      var iRect = preview.getBoundingClientRect();
+      // Convert iframe-relative coords to container-relative
+      var x = r.left - iRect.left;
+      var y = r.top  - iRect.top;
+      var state = { x: Math.max(0,x), y: Math.max(0,y), w: r.width, h: r.height };
+      if (!dragState.elements[key]) {
+        dragState.elements[key] = state;
+      }
+      showDragBox(key, dragState.elements[key]);
+    });
+  } catch(e) {
+    // srcdoc iframe - same origin so should work
+  }
+}
+
+// Reset drag state
+document.getElementById('btn-reset-layout').addEventListener('click', function() {
+  dragState.elements = {};
+  DRAG_ELEMENTS.forEach(function(el) {
+    var box = document.getElementById('dbox-' + el.id);
+    if (box) box.style.display = 'none';
+  });
+  ['pos_card_x','pos_card_y','pos_wheel_x','pos_wheel_y','pos_btn_x','pos_btn_y',
+   'sz_card_w','sz_card_h','sz_wheel','sz_btn_w','sz_btn_h'].forEach(function(id) {
+    setHidden(id, '0');
+  });
+  try { localStorage.removeItem('wof_drag_v1'); } catch(e) {}
+  generate();
+  this.textContent = '✓ Сброшено';
+  var btn = this;
+  setTimeout(function(){ btn.textContent = '↺ Сбросить позиции'; }, 1500);
+});
+
+// Init overlay after preview loads
+document.getElementById('preview').addEventListener('load', function() {
+  setTimeout(function() {
+    initDragOverlay();
+    restoreDragState();
+    setTimeout(detectElementPositions, 300);
+  }, 100);
+});
+
+loadDemoQuestions();
 renderWheelOptions();
 generate();
 
