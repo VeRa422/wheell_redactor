@@ -1133,10 +1133,16 @@ ${transparentCSS}
   // Активируется только в предпросмотре (не в Genially)
   // Определяем по отсутствию родительского фрейма Genially
   function initDragResize() {
-    var isEditor = (window.location === window.parent.location) ||
-                   (window.parent && window.parent.location && 
-                    !window.parent.location.href.includes('genially'));
-    if (!isEditor) return;
+    // Only in editor preview (srcdoc has about:srcdoc location)
+    try {
+      var loc = window.location.href;
+      var parentLoc = window.parent.location.href;
+      // If parent is Genially presentation - don't show handles
+      if (parentLoc.includes('view.genially.com') || parentLoc.includes('app.genially.com')) return;
+    } catch(e) {
+      // Cross-origin parent = Genially iframe = don't show handles
+      return;
+    }
 
     var targets = [
       {el: document.getElementById('deck'),       label: '📋'},
@@ -1151,49 +1157,36 @@ ${transparentCSS}
   }
 
   function makeDraggableResizable(el, label) {
-    // Make positioned
-    el.style.position = 'absolute';
-    el.style.cursor = 'default';
+    el.style.position = 'relative'; // keep in normal flow
     el.style.userSelect = 'none';
-    el.style.boxSizing = 'border-box';
 
-    // Set initial position from current layout
-    var r = el.getBoundingClientRect();
-    var pr = el.parentElement.getBoundingClientRect();
-    if (el.style.left === '') {
-      el.style.left = (r.left - pr.left) + 'px';
-      el.style.top  = (r.top  - pr.top)  + 'px';
-      el.style.width  = r.width  + 'px';
-      el.style.height = r.height + 'px';
-    }
-
-    // Drag handle (top strip)
+    // Drag handle (top strip) - shown above element
     var handle = document.createElement('div');
-    handle.style.cssText = [
-      'position:absolute', 'top:-22px', 'left:0', 'right:0', 'height:20px',
-      'background:rgba(255,220,0,0.85)', 'color:#000', 'font-size:10px',
-      'font-weight:bold', 'display:flex', 'align-items:center',
-      'padding:0 6px', 'cursor:move', 'border-radius:4px 4px 0 0',
-      'z-index:9999', 'user-select:none'
-    ].join(';');
-    handle.textContent = label + ' тянуть';
+    handle.style.cssText = 'position:absolute;top:-22px;left:0;right:0;height:20px;background:rgba(255,220,0,0.85);color:#000;font-size:10px;font-weight:bold;display:flex;align-items:center;padding:0 6px;cursor:move;border-radius:4px 4px 0 0;z-index:9999;user-select:none;white-space:nowrap;';
+    handle.textContent = label + ' ✥ двигать';
     el.appendChild(handle);
 
     // Resize handle (bottom-right corner)
     var resizer = document.createElement('div');
-    resizer.style.cssText = [
-      'position:absolute', 'bottom:-6px', 'right:-6px',
-      'width:16px', 'height:16px', 'background:rgba(255,220,0,0.9)',
-      'cursor:se-resize', 'border-radius:3px', 'z-index:9999'
-    ].join(';');
+    resizer.style.cssText = 'position:absolute;bottom:-6px;right:-6px;width:16px;height:16px;background:rgba(255,220,0,0.9);cursor:se-resize;border-radius:3px;z-index:9999;';
     el.appendChild(resizer);
 
-    // Drag logic
     var dragging = false, resizing = false;
     var startX, startY, startL, startT, startW, startH;
 
     handle.addEventListener('mousedown', function(e) {
       e.preventDefault(); e.stopPropagation();
+      // Switch to absolute only when user starts dragging
+      if (el.style.position !== 'absolute') {
+        var r = el.getBoundingClientRect();
+        var pr = el.offsetParent ? el.offsetParent.getBoundingClientRect() : {left:0,top:0};
+        el.style.position = 'absolute';
+        el.style.left = (r.left - pr.left) + 'px';
+        el.style.top  = (r.top  - pr.top)  + 'px';
+        el.style.width  = r.width  + 'px';
+        el.style.height = r.height + 'px';
+        el.style.margin = '0';
+      }
       dragging = true;
       startX = e.clientX; startY = e.clientY;
       startL = parseInt(el.style.left) || 0;
@@ -1219,9 +1212,7 @@ ${transparentCSS}
       }
     });
 
-    document.addEventListener('mouseup', function() {
-      dragging = false; resizing = false;
-    });
+    document.addEventListener('mouseup', function() { dragging = false; resizing = false; });
   }
 
   // ---- EVENT LISTENERS ----
