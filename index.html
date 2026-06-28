@@ -1709,7 +1709,17 @@ document.getElementById('preview').addEventListener('load', function() {
 });
 
 
-loadDemoQuestions();
+// ---- ВЕРСИЯ И СБРОС ----
+var EDITOR_VERSION = 'v3.1';
+if (localStorage.getItem('wof_version') !== EDITOR_VERSION) {
+  Object.keys(localStorage).forEach(function(k){
+    if (k.startsWith('wof_') || k.startsWith('wof')) localStorage.removeItem(k);
+  });
+  localStorage.setItem('wof_version', EDITOR_VERSION);
+}
+
+var restored = restoreFields();
+if (!restored) loadDemoQuestions();
 renderWheelOptions();
 generate();
 
