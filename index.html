@@ -545,10 +545,12 @@ function escapeForSrcdoc(html){
 }
 
 function safeJson(obj){
+  // Escape chars that break in srcdoc double-quote context
   return JSON.stringify(obj)
     .replace(/</g,'\\u003c')
     .replace(/>/g,'\\u003e')
-    .replace(/&/g,'\\u0026');
+    .replace(/&/g,'\\u0026')
+    .replace(/\\"/g,'\\u0022');  // " -> \u0022 so escapeForSrcdoc can't break it
 }
 
 // =========== COLOR & STYLE HELPERS ===========
@@ -653,7 +655,15 @@ function buildGameHtml(cfg){
   const particleURL2 = cfg.urls.particle||'';
   const particleJson = safeJson(particleURL2);
   const wheelBgJson = safeJson(cfg.urls.wheelBg||'');
-  const cardBgJson  = safeJson(cfg.urls.cardBg||'');
+  const cardBgJson      = safeJson(cfg.urls.cardBg||'');
+  const wheelFrameJson  = safeJson(cfg.urls.wheelFrame||'');
+  const arrowJson       = safeJson(cfg.urls.arrow||'');
+  const pointerJson     = safeJson(cfg.urls.pointer||'');
+  const bgJson          = safeJson(cfg.urls.bg||'');
+  const startBgJson     = safeJson(cfg.urls.startBg||'');
+  const victoryBgJson   = safeJson(cfg.urls.victoryBg||'');
+  const progressBgJson  = safeJson(cfg.urls.progress||'');
+  const btnBgJson       = safeJson(cfg.urls.btnBg||'');
   const cardBgSizeJson = safeJson(cfg.style.cardBgSize||'cover');
   const cardBgPosJson  = safeJson((cfg.style.cardBgPosX||'50')+'% '+(cfg.style.cardBgPosY||'50')+'%');
   const blankCharJson = safeJson(cfg.blankChar);
@@ -680,11 +690,11 @@ ${transparentCSS}
 .static-pointer{width:clamp(50px,7vw,90px)!important;height:clamp(50px,7vw,90px)!important;right:clamp(-35px,-5vw,-55px)!important;margin-top:clamp(-25px,-3vw,-45px)!important;}
 #custom-cursor{position:fixed;width:20px;height:20px;border:2px solid #ffd700;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);box-shadow:0 0 15px #ffd700;}
 .overlay{position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:5000;}
-#start-screen{${startBgCSS}}
-#victory-screen{${victoryBgCSS}display:none;}
-.tomb{position:relative;width:100vw;height:100vh;background:${tombBg};display:none;flex-direction:column;justify-content:center;align-items:center;}
+#start-screen{background:rgba(0,0,0,0.95);}
+#victory-screen{background:rgba(0,0,0,0.95);display:none;}
+.tomb{position:relative;width:100vw;height:100vh;background:radial-gradient(circle,rgba(42,31,5,0.6)0%,rgba(0,0,0,0.95)100%);display:none;flex-direction:column;justify-content:center;align-items:center;}
 .gold-text{font-family:${st.fontTitle};color:${st.titleColor};font-size:clamp(28px,5vw,60px);text-align:center;${titleShadowCSS}margin-bottom:40px;}
-.game-btn{padding:16px 70px;${btnBgCSS}border-radius:${st.btnRadius}px;font-family:${st.fontTitle};font-size:clamp(14px,2vw,24px);color:${st.btnText};${shadowCSS}cursor:pointer;transition:0.2s;outline:none;}
+.game-btn{padding:16px 70px;background:linear-gradient(${st.btnBg1},${st.btnBg2});border:3px solid ${st.btnBorder};opacity:${st.btnOpacity};border-radius:${st.btnRadius}px;font-family:${st.fontTitle};font-size:clamp(14px,2vw,24px);color:${st.btnText};${shadowCSS}cursor:pointer;transition:0.2s;outline:none;}
 .game-btn:active{transform:translateY(5px);${btnShadowActive}}
 .wheel-box{position:relative;width:clamp(280px,40vw,480px);height:clamp(280px,40vw,480px);}
 .static-pointer{position:absolute;width:90px;height:90px;right:-55px;top:50%;margin-top:-45px;transform:rotate(-90deg);filter:drop-shadow(0 0 15px #ffd700);z-index:100;pointer-events:none;display:flex;align-items:center;justify-content:center;font-size:50px;color:#ffd700;animation:pushEffort 1s infinite ease-in-out;}
@@ -698,7 +708,7 @@ ${transparentCSS}
 @keyframes arrowPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.15)}}
 .game-layout{display:flex;align-items:center;gap:clamp(30px,5vw,80px);z-index:10;margin-top:clamp(20px,4vh,50px);}
 .card-stack{position:relative;width:clamp(260px,35vw,450px);height:clamp(120px,15vw,180px);perspective:2000px;}
-.quest-card{position:absolute;width:100%;height:100%;${cardBgCSS}border-radius:12px;display:flex;justify-content:center;align-items:center;color:${st.cardText};font-size:clamp(16px,2vw,26px);font-weight:bold;text-align:center;padding:25px;box-shadow:0 15px 35px rgba(0,0,0,0.8);transition:transform 0.8s cubic-bezier(0.19,1,0.22,1),opacity 0.5s;${shadowCSS}}
+.quest-card{position:absolute;width:100%;height:100%;background:linear-gradient(135deg,#d4af37 0%,#a67c00 50%,#5c4306 100%);border:3px solid #3d2b04;border-radius:12px;display:flex;justify-content:center;align-items:center;color:${st.cardText};font-size:clamp(16px,2vw,26px);font-weight:bold;text-align:center;padding:25px;box-shadow:0 15px 35px rgba(0,0,0,0.8);transition:transform 0.8s cubic-bezier(0.19,1,0.22,1),opacity 0.5s;${shadowCSS}}
 .card-active{transform:translateZ(0) translateY(0);z-index:10;${cardActiveBorderCSS}}
 .card-exit{transform:translate(800px,-400px) rotateX(180deg) rotateY(90deg) scale(0.2)!important;opacity:0!important;}
 .card-shake{animation:shake 0.4s ease-in-out;}
@@ -715,7 +725,7 @@ ${transparentCSS}
 .vol-box input[type=range]{-webkit-appearance:none;width:80px;background:linear-gradient(to right,#5c4306,#ffd700);height:4px;border-radius:3px;cursor:pointer;border:none;outline:none;}
 .vol-box input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:#ffd700;border-radius:50%;border:2px solid #1a1403;cursor:pointer;}
 .prog-slot{width:35px;height:35px;border:2px solid #d4af37;border-radius:6px;background:rgba(10,8,2,0.8);position:relative;overflow:hidden;}
-.prog-fill{position:absolute;bottom:0;left:0;width:100%;height:0%;${progFillCSS}transition:height 0.6s;}
+.prog-fill{position:absolute;bottom:0;left:0;width:100%;height:0%;background:linear-gradient(to top,#8a6d1c,#ffd700);transition:height 0.6s;}
 .victory-fade{animation:vFade 2.5s ease-out forwards;}
 @keyframes vFade{0%{opacity:0;transform:scale(0.9)}100%{opacity:1;transform:scale(1)}}
 </style>
@@ -748,11 +758,11 @@ ${transparentCSS}
   <div class="progress-container" id="progress-bar"></div>
   <div class="game-layout">
     <div class="card-stack" id="deck"></div>
-    <div class="arrow-box">${arrowHTML}</div>
+    <div class="arrow-box"><span id="arrow-default" class="${arrowPulseClass}" style="font-size:50px;color:#ffd700;filter:drop-shadow(0 0 10px #ffd700);">➔</span><img id="arrow-img" style="display:none;width:60px;height:60px;object-fit:contain;filter:drop-shadow(0 0 10px #ffd700);"></div>
     <div class="wheel-box">
-      ${wheelFrameHTML}
+      <div id="wheel-frame-el" style="position:absolute;inset:-30px;pointer-events:none;z-index:1;display:none;"><img id="wheel-frame-img" style="width:100%;height:100%;object-fit:contain;"></div>
       <div class="main-wheel" id="wheel-inner"><div class="wheel-bg" id="wheel-bg-el"></div></div>
-      <div class="static-pointer">${pointerHTML}</div>
+      <div class="static-pointer"><span id="pointer-default">▶</span><img id="pointer-img" style="display:none;width:100%;height:100%;object-fit:contain;"></div>
     </div>
   </div>
   <button class="game-btn" id="unlock-btn" style="margin-top:clamp(20px,4vh,50px)">${escHtml(cfg.unlockBtn)}</button>
@@ -766,7 +776,10 @@ ${transparentCSS}
   var SOUNDS = ${soundsJson};
   var PARTICLE_URL = ${particleJson};
   var WHEEL_BG_URL = ${wheelBgJson};
-  var CARD_BG_URL   = ${cardBgJson};
+  var CARD_BG_URL     = ${cardBgJson};
+  var WHEEL_FRAME_URL = ${wheelFrameJson};
+  var ARROW_URL       = ${arrowJson};
+  var POINTER_URL     = ${pointerJson};
   var CARD_BG_SIZE  = ${cardBgSizeJson};
   var CARD_BG_POS   = ${cardBgPosJson};
   var BLANK_CHAR = ${blankCharJson};
@@ -868,7 +881,13 @@ ${transparentCSS}
     grammarData.forEach(function(){
       var slot=document.createElement('div');
       slot.className='prog-slot';
-      slot.innerHTML='<div class="prog-fill"></div>';
+      slot.innerHTML='<div class="prog-fill" id="pf-'+i+'"></div>';
+    if(PROGRESS_URL&&PROGRESS_URL.length>4){
+      setTimeout(function(ii){ 
+        var pf=document.getElementById('pf-'+ii);
+        if(pf){ pf.style.backgroundImage='url('+PROGRESS_URL+')'; pf.style.backgroundSize='contain'; pf.style.backgroundRepeat='no-repeat'; pf.style.backgroundPosition='center bottom'; }
+      }.bind(null,i),0);
+    }
       progBar.appendChild(slot);
     });
 
@@ -955,11 +974,52 @@ ${transparentCSS}
   // ---- EVENT LISTENERS ----
   // Cursor
   // Set wheel background from URL (safe from escaping)
+// Apply all URL-based backgrounds via JS (avoids srcdoc escaping issues)
 var wbEl=document.getElementById('wheel-bg-el');
 if(wbEl&&WHEEL_BG_URL&&WHEEL_BG_URL.length>4){
   wbEl.style.backgroundImage='url('+WHEEL_BG_URL+')';
   wbEl.style.backgroundSize='cover';
   wbEl.style.backgroundPosition='center';
+}
+function applyBgUrl(id, url, extra) {
+  if(!url||url.length<5) return;
+  var el=document.getElementById(id);
+  if(!el) return;
+  el.style.backgroundImage='url('+url+')';
+  el.style.backgroundSize='cover';
+  el.style.backgroundPosition='center';
+  el.style.backgroundRepeat='no-repeat';
+  if(extra) Object.assign(el.style, extra);
+}
+applyBgUrl('game-view', BG_URL);
+// Wheel frame
+if(WHEEL_FRAME_URL&&WHEEL_FRAME_URL.length>4){
+  var wfEl=document.getElementById('wheel-frame-el');
+  var wfImg=document.getElementById('wheel-frame-img');
+  if(wfEl&&wfImg){ wfImg.src=WHEEL_FRAME_URL; wfEl.style.display='block'; }
+}
+// Arrow
+if(ARROW_URL&&ARROW_URL.length>4){
+  var aDefault=document.getElementById('arrow-default');
+  var aImg=document.getElementById('arrow-img');
+  if(aDefault&&aImg){ aDefault.style.display='none'; aImg.src=ARROW_URL; aImg.style.display='block'; }
+}
+// Pointer
+if(POINTER_URL&&POINTER_URL.length>4){
+  var pDefault=document.getElementById('pointer-default');
+  var pImg=document.getElementById('pointer-img');
+  if(pDefault&&pImg){ pDefault.style.display='none'; pImg.src=POINTER_URL; pImg.style.display='block'; }
+}
+applyBgUrl('start-screen', START_BG_URL);
+applyBgUrl('victory-screen', VICTORY_BG_URL);
+// Progress fill - applied when slots are created (in init)
+// Btn bg - applied to all .game-btn
+if(BTN_BG_URL&&BTN_BG_URL.length>4){
+  document.querySelectorAll('.game-btn').forEach(function(b){
+    b.style.backgroundImage='url('+BTN_BG_URL+')';
+    b.style.backgroundSize='cover';
+    b.style.border='none';
+  });
 }
 var cursor=document.getElementById('custom-cursor');
   document.addEventListener('mousemove',function(e){
