@@ -681,7 +681,7 @@ function buildGameHtml(cfg){
   const wheelFrameHTML=cfg.urls.wheelFrame?'<div style="position:absolute;inset:-30px;pointer-events:none;z-index:1;"><img src="'+cfg.urls.wheelFrame+'" style="width:100%;height:100%;object-fit:contain;"></div>':'';
   const wheelBorderCSS=cfg.urls.wheelFrame?'border:none;':'border:12px solid #8a6d1c;';
   const pointerHTML=cfg.urls.pointer?'<img src="'+cfg.urls.pointer+'" style="width:100%;height:100%;object-fit:contain;">':'▶';
-  const cardBgCSS=cfg.urls.cardBg?"background:url('"+cfg.urls.cardBg+"') center/cover no-repeat;border:3px solid rgba(0,0,0,0.3);":"background:linear-gradient(135deg,#d4af37 0%,#a67c00 50%,#5c4306 100%);border:3px solid #3d2b04;";
+  const cardBgCSS=cfg.urls.cardBg?"background:url('"+cfg.urls.cardBg+"') center/cover no-repeat;border:3px solid rgba(0,0,0,0.3);":"background-color:#a67c00;background-image:linear-gradient(135deg,#d4af37 0%,#a67c00 50%,#5c4306 100%);background-size:cover;background-position:center;background-repeat:no-repeat;border:3px solid #3d2b04;";
   const arrowPulseClass=st.arrowPulse?' arrow-pulse':'';
   const arrowHTML=cfg.urls.arrow?'<img class="'+arrowPulseClass+'" src="'+cfg.urls.arrow+'" style="width:60px;height:60px;object-fit:contain;filter:drop-shadow(0 0 10px #ffd700);">':'<span class="'+arrowPulseClass+'" style="font-size:50px;color:#ffd700;filter:drop-shadow(0 0 10px #ffd700);">➔</span>';
   const glowCSS=st.btnGlow>0?'box-shadow:0 0 '+st.btnGlow+'px '+st.btnBg1+';':'';
@@ -745,20 +745,20 @@ ${transparentCSS}
 .gold-text{font-size:clamp(22px,4vw,60px)!important;}
 .game-btn{font-size:clamp(12px,1.5vw,24px)!important;padding:clamp(10px,1.5vh,16px) clamp(20px,4vw,70px)!important;}
 .word-text{font-size:clamp(11px,1.4vw,20px)!important;}
-.prog-slot{width:clamp(20px,3vw,35px)!important;height:clamp(20px,3vw,35px)!important;}
+.prog-slot{width:clamp(20px,3vw,35px)!important;height:clamp(20px,3vw,35px)!important;overflow:hidden;}
 .static-pointer{width:clamp(50px,7vw,90px)!important;height:clamp(50px,7vw,90px)!important;right:clamp(-35px,-5vw,-55px)!important;margin-top:clamp(-25px,-3vw,-45px)!important;}
 #custom-cursor{position:fixed;width:20px;height:20px;border:2px solid #ffd700;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);box-shadow:0 0 15px #ffd700;}
 .overlay{position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:5000;}
 #start-screen{background:rgba(0,0,0,0.95);}
 #victory-screen{background:rgba(0,0,0,0.95);display:none;}
-.tomb{position:relative;width:100vw;height:100vh;background:radial-gradient(circle,rgba(42,31,5,0.6)0%,rgba(0,0,0,0.95)100%);display:none;flex-direction:column;justify-content:center;align-items:center;}
+.tomb{position:relative;width:100vw;height:100vh;overflow:visible;background-color:rgba(0,0,0,0.95);background-image:radial-gradient(circle,rgba(42,31,5,0.6)0%,rgba(0,0,0,0.95)100%);background-size:cover;background-position:center;display:none;flex-direction:column;justify-content:center;align-items:center;}
 .gold-text{font-family:${st.fontTitle};color:${st.titleColor};font-size:clamp(28px,5vw,60px);text-align:center;${titleShadowCSS}margin-bottom:40px;}
-.game-btn{padding:16px 70px;background:linear-gradient(${st.btnBg1},${st.btnBg2});border:3px solid ${st.btnBorder};opacity:${st.btnOpacity};border-radius:${st.btnRadius}px;font-family:${st.fontTitle};font-size:clamp(14px,2vw,24px);color:${st.btnText};${shadowCSS}cursor:pointer;transition:0.2s;outline:none;}
+.game-btn{padding:16px 70px;background-color:${st.btnBg1};background-image:linear-gradient(${st.btnBg1},${st.btnBg2});border:3px solid ${st.btnBorder};opacity:${st.btnOpacity};background-size:cover;background-position:center;background-repeat:no-repeat;border-radius:${st.btnRadius}px;font-family:${st.fontTitle};font-size:clamp(14px,2vw,24px);color:${st.btnText};${shadowCSS}cursor:pointer;transition:0.2s;outline:none;}
 .game-btn:active{transform:translateY(5px);${btnShadowActive}}
 .wheel-box{position:relative;width:clamp(280px,40vw,480px);height:clamp(280px,40vw,480px);overflow:visible;}
 .static-pointer{position:absolute;width:90px;height:90px;right:-55px;top:50%;margin-top:-45px;transform:rotate(-90deg);filter:drop-shadow(0 0 15px #ffd700);z-index:100;pointer-events:none;display:flex;align-items:center;justify-content:center;font-size:50px;color:#ffd700;animation:pushEffort 1s infinite ease-in-out;}
 @keyframes pushEffort{0%,100%{transform:rotate(-90deg) translateX(0)}50%{transform:rotate(-90deg) translateX(-5px)}}
-.wheel-bg{position:absolute;inset:0;border-radius:50%;background:rgba(10,8,2,0.95);overflow:hidden;z-index:1;}
+.wheel-bg{position:absolute;inset:0;border-radius:50%;background-color:rgba(10,8,2,0.95);background-size:cover;background-position:center;background-repeat:no-repeat;overflow:hidden;z-index:1;}
 .main-wheel{width:100%;height:100%;border-radius:50%;${wheelBorderCSS}position:relative;z-index:5;transition:transform 0.2s cubic-bezier(0.1,0,0.2,1);box-shadow:0 0 50px rgba(0,0,0,0.5),inset 0 0 40px rgba(0,0,0,0.5);overflow:visible;z-index:5;}
 .word-item{position:absolute;left:50%;top:50%;width:clamp(80px,16vw,180px);margin-left:calc(-1 * clamp(110px,22vw,220px));transform-origin:clamp(110px,22vw,220px) center;display:flex;justify-content:flex-start;align-items:center;z-index:10;}
 .word-text{color:${st.wheelText};font-size:clamp(12px,1.5vw,20px);font-weight:bold;transition:0.3s;white-space:nowrap;padding-left:10px;${shadowCSS}}
@@ -767,7 +767,7 @@ ${transparentCSS}
 @keyframes arrowPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.15)}}
 .game-layout{display:flex;align-items:center;gap:clamp(30px,5vw,80px);z-index:10;margin-top:clamp(20px,4vh,50px);}
 .card-stack{position:relative;width:clamp(260px,35vw,450px);height:clamp(120px,15vw,180px);perspective:2000px;}
-.quest-card{position:absolute;width:100%;height:100%;background:linear-gradient(135deg,#d4af37 0%,#a67c00 50%,#5c4306 100%);border:3px solid #3d2b04;border-radius:12px;display:flex;justify-content:center;align-items:center;color:${st.cardText};font-size:clamp(16px,2vw,26px);font-weight:bold;text-align:center;padding:25px;box-shadow:0 15px 35px rgba(0,0,0,0.8);transition:transform 0.8s cubic-bezier(0.19,1,0.22,1),opacity 0.5s;${shadowCSS}}
+.quest-card{position:absolute;width:100%;height:100%;background-color:#a67c00;background-image:linear-gradient(135deg,#d4af37 0%,#a67c00 50%,#5c4306 100%);background-size:cover;background-position:center;background-repeat:no-repeat;border:3px solid #3d2b04;border-radius:12px;display:flex;justify-content:center;align-items:center;color:${st.cardText};font-size:clamp(16px,2vw,26px);font-weight:bold;text-align:center;padding:25px;box-shadow:0 15px 35px rgba(0,0,0,0.8);transition:transform 0.8s cubic-bezier(0.19,1,0.22,1),opacity 0.5s;${shadowCSS}}
 .card-active{transform:translateZ(0) translateY(0);z-index:10;${cardActiveBorderCSS}}
 .card-exit{transform:translate(800px,-400px) rotateX(180deg) rotateY(90deg) scale(0.2)!important;opacity:0!important;}
 .card-shake{animation:shake 0.4s ease-in-out;}
@@ -824,7 +824,7 @@ ${transparentCSS}
       <div class="static-pointer"><span id="pointer-default">▶</span><img id="pointer-img" style="display:none;width:100%;height:100%;object-fit:contain;"></div>
     </div>
   </div>
-  <button class="game-btn" id="unlock-btn" style="margin-top:clamp(20px,4vh,50px)">${escHtml(cfg.unlockBtn)}</button>
+  <button class="game-btn" id="unlock-btn" style="margin-top:clamp(20px,4vh,50px);max-width:clamp(200px,40vw,500px);width:100%;box-sizing:border-box;">${escHtml(cfg.unlockBtn)}</button>
 </div>
 
 <script>
