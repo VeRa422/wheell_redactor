@@ -346,7 +346,7 @@
   <!-- RIGHT PREVIEW -->
   <div class="preview-side">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;padding:0 4px;">
-      <span style="font-size:10px;color:#888;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;">👆 Тяните элементы мышкой прямо в окне предпросмотра</span>
+      <span id="drag-hint" style="font-size:10px;color:#aaa;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;">👆 Нажмите СОЗДАТЬ, затем СТАРТ в игре — появятся ручки перетаскивания</span>
       <button id="btn-reset-layout" style="background:#333;border:none;color:#aaa;padding:4px 10px;border-radius:6px;font-size:10px;cursor:pointer;">↺ Сбросить позиции</button>
     </div>
     <div class="preview-frame-container" style="position:relative;">
@@ -479,7 +479,11 @@ function loadBgWithFallback(el, url, size, pos) {
 }
 function getUrl(id){
   const el = document.getElementById(id);
-  return el ? proxyUrl(el.value.trim()) : '';
+  if (!el) return '';
+  var url = el.value.trim();
+  // Use base64 from cache if available (fetched for CSP-safe embedding)
+  if (url && imgCache[url]) return imgCache[url];
+  return url;
 }
 
 // =========== SOUND UPLOAD ===========
@@ -614,12 +618,44 @@ function safeJson(obj){
     .replace(/\\"/g,'\\u0022');
 }
 function safeUrl(url){
-  // Use single-quoted JS string - escapeForSrcdoc doesn't touch single quotes
-  // (escapeForSrcdoc only converts & and ")
   if(!url) return "''";
-  // Escape single quotes and backslashes within the URL (rare but possible)
   var escaped = url.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
   return "'" + escaped + "'";
+}
+
+// Cache for base64 images fetched from editor side
+var imgCache = {};
+
+// Fetch image via editor (no CSP), convert to base64 data URL
+function fetchAsBase64(url, callback) {
+  if (!url || url.length < 5) { callback(url); return; }
+  if (imgCache[url]) { callback(imgCache[url]); return; }
+  // Try fetch with no-cors mode first, then cors
+  fetch(url)
+    .then(function(r){ return r.blob(); })
+    .then(function(blob){
+      var reader = new FileReader();
+      reader.onload = function(e){
+        imgCache[url] = e.target.result;
+        callback(e.target.result);
+      };
+      reader.readAsDataURL(blob);
+    })
+    .catch(function(){
+      // If direct fetch fails, try via proxy
+      var proxyUrl = 'https://images.weserv.nl/?url=' + encodeURIComponent(url) + '&output=webp';
+      fetch(proxyUrl)
+        .then(function(r){ return r.blob(); })
+        .then(function(blob){
+          var reader = new FileReader();
+          reader.onload = function(e){
+            imgCache[url] = e.target.result;
+            callback(e.target.result);
+          };
+          reader.readAsDataURL(blob);
+        })
+        .catch(function(){ callback(url); }); // fallback to original URL
+    });
 }
 
 // =========== COLOR & STYLE HELPERS ===========
@@ -1210,6 +1246,29 @@ var cursor=document.getElementById('custom-cursor');
 
 // =========== GENERATE ===========
 function generate(){
+  // Pre-fetch images as base64 to avoid CSP issues in srcdoc
+  var urlsToFetch = ['url_wheel_bg','url_card_bg','url_bg','url_start_bg','url_victory_bg','url_btn_bg','url_progress'];
+  var pending = urlsToFetch.filter(function(id){ var el=document.getElementById(id); return el && el.value.trim().length>5; });
+  if (pending.length > 0 && !window._skipFetch) {
+    window._skipFetch = true;
+    var done = 0;
+    pending.forEach(function(id){
+      var url = getUrl(id);
+      fetchAsBase64(url, function(b64){
+        imgCache[url] = b64;
+        done++;
+        if (done >= pending.length) {
+          window._skipFetch = false;
+          generateNow();
+        }
+      });
+    });
+    return;
+  }
+  window._skipFetch = false;
+  generateNow();
+}
+function generateNow(){
   const cfg={
     title: document.getElementById('ui_title').value||'Wheel of Wisdom',
     titleMain: document.getElementById('ui_title').value||'Wheel of Wisdom',
@@ -1644,6 +1703,9 @@ document.getElementById('preview').addEventListener('load', function() {
   drLoad();
   drRender();
   setTimeout(drDetect, 400);
+  // Also try detecting after user might click START
+  setTimeout(drDetect, 2000);
+  setTimeout(drDetect, 4000);
 });
 
 
