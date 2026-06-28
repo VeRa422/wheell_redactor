@@ -614,10 +614,12 @@ function safeJson(obj){
     .replace(/\\"/g,'\\u0022');
 }
 function safeUrl(url){
-  // For URLs: only escape chars that break HTML attributes, preserve & in query strings
-  if(!url) return '""';
-  // Replace " with \u0022 so escapeForSrcdoc doesn't break it
-  return '"' + url.replace(/\\/g,'\\\\').replace(/"/g,'\\u0022') + '"';
+  // Use single-quoted JS string - escapeForSrcdoc doesn't touch single quotes
+  // (escapeForSrcdoc only converts & and ")
+  if(!url) return "''";
+  // Escape single quotes and backslashes within the URL (rare but possible)
+  var escaped = url.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  return "'" + escaped + "'";
 }
 
 // =========== COLOR & STYLE HELPERS ===========
@@ -854,18 +856,26 @@ ${transparentCSS}
   // ---- IMAGE LOADING UTILITIES ----
   function loadImgWithFallback(imgEl, url) {
     if(!url||url.length<5) return;
-    // Try direct first, then proxy on error
+    var proxied = proxyIfNeeded(url);
     imgEl.onerror=function(){
       imgEl.onerror=null;
-      imgEl.src='https://images.weserv.nl/?url='+encodeURIComponent(url)+'&output=png';
+      // If proxy also fails, try corsproxy
+      imgEl.src='https://corsproxy.io/?'+encodeURIComponent(url);
     };
-    imgEl.src=url;
+    imgEl.src=proxied;
+  }
+  function proxyIfNeeded(url) {
+    // img.genially.com may be blocked by CSP in srcdoc - use proxy
+    if (url && url.indexOf('img.genially.com') !== -1) {
+      return 'https://images.weserv.nl/?url=' + encodeURIComponent(url);
+    }
+    return url;
   }
   function loadBgWithFallback(el, url, sz, pos) {
     if(!url||url.length<5) return;
     sz=sz||'cover'; pos=pos||'center';
-    // CSS background-image bypasses CORS - set directly without Image() test
-    el.style.backgroundImage='url('+url+')';
+    var proxied = proxyIfNeeded(url);
+    el.style.backgroundImage='url('+proxied+')';
     el.style.backgroundSize=sz;
     el.style.backgroundPosition=pos;
     el.style.backgroundRepeat='no-repeat';
@@ -1533,6 +1543,7 @@ function drApply() {
 }
 
 function drRender() {
+  if (!DR || !DR.boxes) return;
   var ov = drGetOverlay();
   if (!ov) return;
   ov.innerHTML = '';
@@ -1562,7 +1573,7 @@ function drStartDrag(e, id, mode, b) {
 }
 
 document.addEventListener('mousemove', function(e) {
-  if (!DR.drag) return;
+  if (!DR || !DR.drag) return;
   var d = DR.drag, b = DR.boxes[d.id];
   if (!b) return;
   var dx = e.clientX - d.ox, dy = e.clientY - d.oy;
@@ -1580,7 +1591,7 @@ document.addEventListener('mousemove', function(e) {
 });
 
 document.addEventListener('mouseup', function() {
-  if (!DR.drag) return;
+  if (!DR || !DR.drag) return;
   DR.drag = null;
   drSave();
   drApply();
