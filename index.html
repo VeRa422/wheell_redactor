@@ -103,6 +103,10 @@ iframe{width:100%;height:100%;border:none;}
       <!-- TAB: ТЕКСТЫ -->
       <div id="tab-texts" class="tab-pane active">
         <h3>Экран старта</h3>
+        <label class="check-row" style="margin:0 0 10px;padding:8px 10px;border:1px solid #2f7d32;background:rgba(46,125,50,.14);border-radius:8px;line-height:1.4;">
+          <input type="checkbox" id="chk_autostart" checked>
+          <span>⚡ <b>Автозапуск</b> — игра стартует сразу, без экрана и кнопки «Старт». Рекомендуется для Genially (нет «мёртвой» кнопки).</span>
+        </label>
         <div class="field-group row2">
           <div><label>Название</label><input id="ui_title" type="text" value="Wheel of Wisdom"></div>
           <div><label>Подзаголовок</label><input id="ui_subtitle" type="text" value="Колесо мудрости"></div>
@@ -121,13 +125,22 @@ iframe{width:100%;height:100%;border:none;}
           <div><label>Кнопка ответа</label><input id="ui_unlock" type="text" value="Check Answer"></div>
         </div>
         <h3>Встраивание в Genially</h3>
-        <div class="field-group">
-          <label>Режим встраивания</label>
+        <div class="help" style="border:1px solid #2f7d32;background:rgba(46,125,50,.12);padding:10px;border-radius:8px;line-height:1.5;">
+          <b style="color:#9be59b;">✅ Вставка кодом — без HTML-файла и без GitHub.</b> С включённым <b>автозапуском</b> кнопка «Старт» не нужна, поэтому ничего не «зависает».
+          <ol style="margin:8px 0 0 18px;padding:0;">
+            <li>Нажмите <b>«СОЗДАТЬ»</b> — код появится в поле ниже.</li>
+            <li>Нажмите <b>«СКОПИРОВАТЬ»</b>.</li>
+            <li>В Genially: <b>Вставка → Виджет / Вставить код</b> (Insert → Insert code / Embed) → вставьте код и подтвердите.</li>
+            <li>В редакторе Genially iframe может не кликаться — проверяйте через <b>«Просмотр»</b> или после публикации.</li>
+          </ol>
+        </div>
+        <div class="field-group" style="margin-top:10px;">
+          <label>Формат кода для вставки</label>
           <select id="embed_mode">
-            <option value="data" selected>Data-URI — работает в Genially ✓</option>
-            <option value="srcdoc">srcdoc — классический (может не работать в Genially)</option>
+            <option value="srcdoc" selected>srcdoc — для Genially (вставка кодом)</option>
+            <option value="data">Data-URI — самодостаточный (другие сайты)</option>
           </select>
-          <div class="help">Для Genially оставьте <b>Data-URI</b>. Это главное исправление: такой iframe не наследует ограничения Genially, и скрипт игры запускается. Если по какой-то причине data-URI у вас не сработает — скачайте HTML, загрузите на любой хостинг и вставьте обычной ссылкой.</div>
+          <div class="help">Для <b>Genially</b> оставьте <b>srcdoc</b>. Если конкретный блок Genially не примет код — переключите на <b>Data-URI</b>. Кнопка «↓ HTML» внизу — запасной вариант (скачать файл и при желании выложить ссылкой).</div>
         </div>
         <div class="field-group row2" style="margin-top:8px;">
           <div><label>Ширина</label><input id="iframe_w" type="text" value="100%"></div>
@@ -331,15 +344,18 @@ iframe{width:100%;height:100%;border:none;}
 
     <div class="btn-group">
       <button class="btn-action btn-gold" id="btnGenerate">⚡ СОЗДАТЬ</button>
-      <button class="btn-action btn-copy" id="btnCopy">СКОПИРОВАТЬ</button>
-      <button class="btn-action btn-copy" id="btnDownload">↓ HTML</button>
+      <button class="btn-action btn-copy" id="btnCopy">СКОПИРОВАТЬ КОД</button>
+      <button class="btn-action btn-gold" id="btnDownload" title="Запасной вариант: скачать HTML-файл">↓ HTML</button>
       <button class="btn-action" id="btnReset" style="background:#5a1a1a;color:#ff8888;flex:0.6;" title="Сбросить всё">🗑</button>
+    </div>
+    <div style="margin-top:8px;">
+      <label style="font-size:11px;color:#9be59b;font-weight:bold;display:block;margin-bottom:4px;">📋 Код для вставки в Genially (скопируйте и вставьте через «Вставить код»)</label>
+      <textarea id="hidden_output" readonly onclick="this.select()" style="width:100%;height:90px;background:#0d0d0d;color:#7CFC7C;border:1px solid #2f7d32;border-radius:8px;padding:8px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;line-height:1.4;resize:vertical;white-space:pre-wrap;word-break:break-all;"></textarea>
     </div>
     <div class="studio-footer">
       <p class="footer-brand-text"><span>ИГРОВОЙ</span> КВАРТАЛ</p>
       <p class="footer-copyright">© Все права защищены</p>
     </div>
-    <textarea id="hidden_output" style="display:none;"></textarea>
   </div><!-- end editor-side -->
 
   <!-- RIGHT PREVIEW -->
@@ -664,6 +680,7 @@ function buildGameHtml(cfg){
     blank:cfg.blankChar,
     cardSize:st.cardBgSize,
     cardPos:st.cardBgPos,
+    autoStart:!!cfg.autoStart,
     ov:cfg.overrides||{}
   };
   var CFG_JSON=safeJson(gameConfig);
@@ -719,7 +736,7 @@ transparentCSS+
 '</style></head><body>'+
 '<div id="custom-cursor"></div>'+
 '<div id="flash-red"></div>'+
-'<div id="start-screen" class="overlay">'+
+'<div id="start-screen" class="overlay"'+(cfg.autoStart?' style="display:none"':'')+'>'+
   '<div class="gold-text">'+escHtml(cfg.titleMain)+'<br><span style="font-size:0.45em">'+escHtml(cfg.subtitle)+'</span></div>'+
   '<div class="vol-box" style="position:relative;top:auto;right:auto;margin-bottom:30px;"><span id="mute-s">🔇</span><input type="range" id="vol-start" min="0" max="1" step="0.05" value="0.5"><span id="unmute-s">🔊</span></div>'+
   '<button class="game-btn" id="start-btn">'+escHtml(cfg.startBtn)+'</button>'+
@@ -728,7 +745,7 @@ transparentCSS+
   '<div class="gold-text">'+escHtml(cfg.victoryTitle)+'<br><span style="font-size:0.45em">'+escHtml(cfg.victorySub)+'</span></div>'+
   '<button class="game-btn" id="again-btn">'+escHtml(cfg.againBtn)+'</button>'+
 '</div>'+
-'<div class="tomb" id="game-view">'+
+'<div class="tomb" id="game-view"'+(cfg.autoStart?' style="display:flex"':'')+'>'+
   '<div class="vol-box"><span id="mute-g">🔇</span><input type="range" id="vol-game" min="0" max="1" step="0.05" value="0.5"><span id="unmute-g">🔊</span></div>'+
   '<div class="progress-container" id="progress-bar"></div>'+
   '<div class="game-layout">'+
@@ -800,6 +817,7 @@ transparentCSS+
 'document.getElementById("mute-g").addEventListener("click",function(){setVol(0);});'+
 'document.getElementById("unmute-g").addEventListener("click",function(){setVol(1);});'+
 'applyStaticAssets();'+
+'if(CFG.autoStart){startGame();}'+
 '})();<\/script>'+
 '</body></html>';
 }
@@ -818,6 +836,7 @@ function gatherCfg(){
     againBtn:document.getElementById('ui_again').value||'Play Again',
     unlockBtn:document.getElementById('ui_unlock').value||'Check Answer',
     blankChar:document.getElementById('ui_blank').value||'?',
+    autoStart:document.getElementById('chk_autostart').checked,
     transparent:document.getElementById('transparentBg').checked,
     urls:{
       bg:getUrl('url_bg'),startBg:getUrl('url_start_bg'),victoryBg:getUrl('url_victory_bg'),
@@ -862,11 +881,12 @@ function copyOut(){
     b.textContent='✓ СКОПИРОВАНО';b.style.background='#2d6a2d';
     setTimeout(function(){b.textContent=o;b.style.background='';},2000);
   }).catch(function(){
-    var b=document.getElementById('btnCopy');b.textContent='✗ ОШИБКА';setTimeout(function(){b.textContent='СКОПИРОВАТЬ';},2000);
+    var b=document.getElementById('btnCopy');b.textContent='✗ ОШИБКА';setTimeout(function(){b.textContent='СКОПИРОВАТЬ КОД';},2000);
   });
 }
 function downloadHtml(){
-  var html=document.getElementById('preview').srcdoc||'';
+  // rebuild fresh so the latest drag positions (overrides) are baked in
+  var html=buildGameHtml(gatherCfg());
   var blob=new Blob([html],{type:'text/html;charset=utf-8'});
   var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='wheel-of-wisdom-game.html';
   document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},0);
@@ -1026,7 +1046,7 @@ function drResetLayout(){
    SAVE / RESTORE (editor fields)
 ============================================================ */
 var SAVE_FIELDS=['ui_title','ui_subtitle','ui_start','ui_blank','ui_victory_title','ui_victory_sub','ui_again','ui_unlock','embed_mode','iframe_w','iframe_h','url_bg','url_start_bg','url_victory_bg','url_wheel_bg','url_wheel_frame','url_pointer','url_card_bg','url_arrow','url_progress','url_particle','url_btn_bg','clr_title','clr_btn_text','clr_btn_bg1','clr_btn_bg2','clr_btn_border','clr_wheel_text','clr_wheel_active','clr_card_text','clr_shadow','clr_card_border','clr_active_bg','sel_font_title','sel_font_body','sld_btn_radius','sld_title_glow','sld_btn_glow','sld_btn_opacity','sld_shadow_size','sld_shadow_blur','sld_card_border_width','sld_card_border_opacity','sld_active_bg_opacity','sld_active_bg_radius','card_bg_size','card_bg_pos_x','card_bg_pos_y'];
-var SAVE_CHECKS=['transparentBg','chk_arrow_pulse'];
+var SAVE_CHECKS=['transparentBg','chk_arrow_pulse','chk_autostart'];
 function saveAll(){
   try{
     var d={};
@@ -1059,7 +1079,7 @@ function restoreAll(){
 function resetAll(){
   if(!confirm('Сбросить все настройки, картинки и задания? Действие необратимо.')) return;
   try{ ['wof_editor_v3','wof_questions_v3','wof_extra_v3','wof_manual_v3','wof_dr_v3'].forEach(function(k){localStorage.removeItem(k);}); }catch(e){}
-  var defs={ui_title:'Wheel of Wisdom',ui_subtitle:'Колесо мудрости',ui_start:'Start',ui_blank:'?',ui_victory_title:'ALL TASKS COMPLETED!',ui_victory_sub:'YOU ARE A TRUE CHAMPION!',ui_again:'Play Again',ui_unlock:'Check Answer',embed_mode:'data',iframe_w:'100%',iframe_h:'600',url_bg:'',url_start_bg:'',url_victory_bg:'',url_wheel_bg:'',url_wheel_frame:'',url_pointer:'',url_card_bg:'',url_arrow:'',url_progress:'',url_particle:'',url_btn_bg:'',clr_title:'#ffd700',clr_btn_text:'#1a1403',clr_btn_bg1:'#ffd700',clr_btn_bg2:'#b8860b',clr_btn_border:'#5c4306',clr_wheel_text:'#5a4814',clr_wheel_active:'#ffffff',clr_card_text:'#1a1403',clr_shadow:'#000000',clr_card_border:'#ffd700',clr_active_bg:'#000000',sld_btn_radius:'15',sld_title_glow:'30',sld_btn_glow:'0',sld_btn_opacity:'1',sld_shadow_size:'2',sld_shadow_blur:'6',sld_card_border_width:'3',sld_card_border_opacity:'1',sld_active_bg_opacity:'0.6',sld_active_bg_radius:'8',card_bg_size:'cover',card_bg_pos_x:'50',card_bg_pos_y:'50'};
+  var defs={ui_title:'Wheel of Wisdom',ui_subtitle:'Колесо мудрости',ui_start:'Start',ui_blank:'?',ui_victory_title:'ALL TASKS COMPLETED!',ui_victory_sub:'YOU ARE A TRUE CHAMPION!',ui_again:'Play Again',ui_unlock:'Check Answer',embed_mode:'srcdoc',iframe_w:'100%',iframe_h:'600',url_bg:'',url_start_bg:'',url_victory_bg:'',url_wheel_bg:'',url_wheel_frame:'',url_pointer:'',url_card_bg:'',url_arrow:'',url_progress:'',url_particle:'',url_btn_bg:'',clr_title:'#ffd700',clr_btn_text:'#1a1403',clr_btn_bg1:'#ffd700',clr_btn_bg2:'#b8860b',clr_btn_border:'#5c4306',clr_wheel_text:'#5a4814',clr_wheel_active:'#ffffff',clr_card_text:'#1a1403',clr_shadow:'#000000',clr_card_border:'#ffd700',clr_active_bg:'#000000',sld_btn_radius:'15',sld_title_glow:'30',sld_btn_glow:'0',sld_btn_opacity:'1',sld_shadow_size:'2',sld_shadow_blur:'6',sld_card_border_width:'3',sld_card_border_opacity:'1',sld_active_bg_opacity:'0.6',sld_active_bg_radius:'8',card_bg_size:'cover',card_bg_pos_x:'50',card_bg_pos_y:'50'};
   Object.keys(defs).forEach(function(k){var el=document.getElementById(k);if(el)el.value=defs[k];});
   document.getElementById('transparentBg').checked=false;
   document.getElementById('chk_arrow_pulse').checked=true;
